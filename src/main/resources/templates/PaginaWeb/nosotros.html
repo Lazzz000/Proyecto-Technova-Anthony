@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tienda de Tecnología</title>
+
+	
+  
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+	
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/PaginaWeb.css}">
+  <link rel="icon" th:href="@{/img/logo.jpg}" type="image/jpg">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+  
+
+</head>
+
+<body class="min-h-screen text-white 
+bg-gradient-to-br from-[#0a1f44] via-[#0f2a5f] to-[#1b1f3b]">
+
+	<!-- NAVBAR-->
+	<nav class="fixed top-0 w-full 
+	bg-[#020617]/70 backdrop-blur-xl
+	border-b border-cyan-400/20 
+	text-white shadow z-50">
+	  <div class="max-w-7xl mx-auto px-6">
+	    <div class="flex justify-between items-center h-16">
+
+	      <!-- Logo -->
+	      <a th:href="@{/PaginaWeb/index}" class="text-xl font-bold text-cyan-400 tracking-wider">
+	        💻 TechNova
+	      </a>
+
+	      <!-- Botón móvil -->
+	      <button id="menuBtn" class="md:hidden text-2xl">
+	        ☰
+	      </button>
+
+	      <!-- Links -->
+	      <ul id="menu"
+	          class="hidden md:flex gap-6 items-center">
+
+	        <li><a th:href="@{/PaginaWeb/index}" class="hover:text-cyan-400 transition">Inicio</a></li>
+	               <li><a th:href="@{/catalogo}" class="hover:text-cyan-400 transition">Productos</a></li>
+
+	        <!-- Dropdown Categorías -->
+	        <li class="relative group">
+	          <span class="cursor-pointer hover:text-cyan-400 transition">Categorías</span>
+	          <ul class="absolute hidden group-hover:block bg-gray-800 mt-2 rounded shadow w-48">
+	            <li th:each="c : ${categorias}">
+					<a th:href="@{'/catalogo?categoria=' + ${c.idCategoria}}"
+	                 th:text="${c.nombreCategoria}"
+	                 class="block px-4 py-2 hover:bg-red-500">
+	              </a>
+	            </li>
+	          </ul>
+	        </li>
+
+				<li><a th:href="@{/nosotros}" class="hover:text-cyan-400 transition">Nosotros</a></li>
+			      <li><a th:href="@{/contacto}" class="hover:text-cyan-400 transition">Contacto</a></li>
+
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/login}" class="bg-red-600 px-3 py-1 rounded">Login</a>
+			      </li>
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/register}" class="border px-3 py-1 rounded">Registro</a>
+			      </li>
+				  <li sec:authorize="isAuthenticated()" class="flex items-center gap-4">
+
+				    <!-- 🛒 CARRITO -->
+				    <a th:href="@{/carrito}"
+				       class="relative hover:text-red-500 transition"
+				       title="Ver carrito">
+
+				      🛒
+				      <!-- contador  -->
+					  <span th:if="${carritoCount > 0}"
+					        th:text="${carritoCount}"
+					        class="absolute -top-2 -right-3 
+					               bg-red-600 text-xs px-1.5 
+					               rounded-full">
+					  </span>
+				    </a>
+					<!--Usuario-->
+					<div class="relative group">
+
+					  <!-- Texto principal -->
+					  <span class="text-sm cursor-pointer hover:text-cyan-400 transition">
+					    Hola, <strong th:text="${nombreCom}"></strong> ⌄
+					  </span>
+
+					  <!-- Dropdown -->
+					  <ul class="absolute right-0 mt-2 w-40
+					         bg-[#020617] border border-cyan-400/20
+					         rounded-lg shadow-lg
+					         opacity-0 invisible
+					         group-hover:opacity-100 group-hover:visible
+					         transition-all duration-200 ease-in-out">
+
+					    <li>
+					      <a th:href="@{/perfil}"
+					         class="block px-4 py-2 hover:bg-cyan-600 hover:text-white rounded-lg">
+					        👤 Mi Perfil
+					      </a>
+					    </li>
+
+					  </ul>
+
+					</div>
+
+				  <li sec:authorize="isAuthenticated()">
+				    <a th:href="@{/logout}"
+				       class="border px-3 py-1 rounded hover:bg-red-600 transition">
+				      Salir
+				    </a>
+				  </li>
+			    </ul>
+			  </div>
+			</nav>
+			<main class="pt-24 pb-16 px-6">
+				<!--Hero -->
+				<section class="relative text-center max-w-5xl mx-auto mb-24">
+
+				  <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-red-500/10 blur-3xl opacity-40 rounded-full"></div>
+
+				  <h1 class="relative text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+				    Impulsando la <span class="text-cyan-400">Innovación</span><br>
+				    desde el corazón de <span class="text-red-500">Wilson</span>
+				  </h1>
+
+				  <p class="relative text-gray-300 text-lg md:text-xl max-w-3xl mx-auto">
+				    Más que una tienda, somos un centro tecnológico donde la calidad,
+				    el rendimiento y la confianza se encuentran.
+				  </p>
+
+				</section>
+			  
+			  <!-- HISTORIA -->
+			  <section class="max-w-5xl mx-auto mb-16">
+			    <div class="bg-[#020617]/60 backdrop-blur rounded-2xl p-8 shadow-lg border border-cyan-400/10">
+			      <h2 class="text-2xl font-semibold text-red-500 mb-4">Nuestra Historia</h2>
+			      <p class="text-gray-300 leading-relaxed">
+			        TechNova nació en Wilson con la misión de acercar la mejor tecnología
+			        a nuestros clientes. Desde nuestros inicios, hemos trabajado con las
+			        principales marcas del mercado para ofrecer productos originales,
+			        precios competitivos y asesoría especializada.
+			      </p>
+			    </div>
+			  </section>
+			  
+			  
+			  
+			  <!-- MISIÓN Y VISIÓN -->
+			  <section class="bg-gradient-to-r from-[#0f172a] to-[#111827] py-20 mb-24 rounded-3xl border border-cyan-400/10">
+			    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12">
+
+			      <div>
+			        <h3 class="text-3xl font-semibold text-cyan-400 mb-6">
+			          Nuestra Misión
+			        </h3>
+			        <p class="text-gray-300 leading-relaxed">
+			          Ofrecer tecnología confiable con asesoría experta y atención personalizada,
+			          creando experiencias de compra seguras y profesionales.
+			        </p>
+			      </div>
+
+			      <div>
+			        <h3 class="text-3xl font-semibold text-red-500 mb-6">
+			          Nuestra Visión
+			        </h3>
+			        <p class="text-gray-300 leading-relaxed">
+			          Consolidarnos como referente tecnológico en Lima y expandir nuestra
+			          presencia digital a nivel nacional.
+			        </p>
+			      </div>
+
+			    </div>
+			  </section>
+			  <!-- TARJETAS DE VENTAJAS -->
+			  <section class="max-w-6xl mx-auto mb-20">
+			    <h2 class="text-3xl font-semibold text-center text-red-500 mb-12">
+			      ¿Por qué elegirnos?
+			    </h2>
+
+			    <div class="grid md:grid-cols-3 gap-8">
+
+			      <div class="bg-[#020617]/60 p-8 rounded-2xl text-center shadow-lg border border-cyan-400/10 hover:scale-105 transition">
+			        <div class="text-4xl mb-4">🛡️</div>
+			        <h4 class="text-cyan-400 font-semibold mb-3">Garantía Real</h4>
+			        <p class="text-gray-400 text-sm">
+			          Todos nuestros productos cuentan con garantía oficial y respaldo.
+			        </p>
+			      </div>
+
+			      <div class="bg-[#020617]/60 p-8 rounded-2xl text-center shadow-lg border border-cyan-400/10 hover:scale-105 transition">
+			        <div class="text-4xl mb-4">🚀</div>
+			        <h4 class="text-cyan-400 font-semibold mb-3">Última Tecnología</h4>
+			        <p class="text-gray-400 text-sm">
+			          Siempre actualizados con las marcas y lanzamientos más recientes.
+			        </p>
+			      </div>
+
+			      <div class="bg-[#020617]/60 p-8 rounded-2xl text-center shadow-lg border border-cyan-400/10 hover:scale-105 transition">
+			        <div class="text-4xl mb-4">🤝</div>
+			        <h4 class="text-cyan-400 font-semibold mb-3">Atención Especializada</h4>
+			        <p class="text-gray-400 text-sm">
+			          Asesoría personalizada para elegir el producto ideal para ti.
+			        </p>
+			      </div>
+
+			    </div>
+			  </section>
+
+
+			  <!--  UBICACIÓN -->
+			  <section class="max-w-6xl mx-auto mb-20">
+			    <div class="bg-[#020617]/70 backdrop-blur rounded-2xl p-10 shadow-xl border border-cyan-400/10 text-center">
+			      <h2 class="text-3xl font-semibold text-red-500 mb-6">
+			        Nuestra Ubicación
+			      </h2>
+			      <p class="text-gray-300 mb-6">
+			        Nos encontramos en el corazón tecnológico de Lima.
+			      </p>
+			      <p class="text-cyan-400 font-semibold">
+			        📍 Av. Wilson 123, Cercado de Lima
+			      </p>
+			    </div>
+			  </section>
+
+			  <!--  CTA  -->
+			  <section class="text-center max-w-4xl mx-auto py-20 border-t border-cyan-400/10">
+
+			    <h2 class="text-4xl font-bold mb-6">
+			      Lleva tu experiencia tecnológica al siguiente nivel
+			    </h2>
+
+			    <p class="text-gray-400 mb-10 text-lg">
+			      Descubre productos seleccionados con los más altos estándares de calidad.
+			    </p>
+
+			    <a th:href="@{/productos}"
+			       class="relative inline-block px-10 py-4 font-semibold text-white
+			              bg-gradient-to-r from-cyan-500 to-red-500
+			              rounded-xl shadow-lg hover:scale-105 transition">
+			      Explorar Catálogo
+			    </a>
+
+			  </section>
+			  </main>
+				
+			<!--  FOOTER -->
+			<footer class="bg-[#020617]/80 backdrop-blur 
+			text-gray-300 border-t border-cyan-400/20">
+
+			  <div class="container mx-auto px-6 py-12">
+
+			    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 text-center md:text-left">
+
+			      <!-- Logo / descripción -->
+			      <div>
+			        <h2 class="text-2xl font-bold text-red-500 mb-3"> 💻 TechNova</h2>
+			        <p class="text-gray-400 text-sm">
+			          La mejor experiencia de tecnologia, con promociones, descuentos y preventas exclusivas para nuestros clientes.
+			        </p>
+			      </div>
+
+			      <!-- Enlaces -->
+			      <div>
+			        <h3 class="font-semibold mb-3">Enlaces</h3>
+			        <ul class="space-y-2 list-none p-0 m-0">
+			          <li><a th:href="@{/PaginaWeb/index}" class="hover:text-red-500">Inicio</a></li>
+			          <li><a th:href="@{/cartelera}" class="hover:text-red-500">Productos</a></li>
+			          <li><a th:href="@{/nosotros}" class="hover:text-red-500">Nosotros</a></li>
+			          <li><a th:href="@{/contacto}" class="hover:text-red-500">Contacto</a></li>
+			        </ul>
+			      </div>
+
+
+			      <!-- Contacto -->
+			      <div>
+			        <h3 class="font-semibold mb-3">Contacto</h3>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-geo-alt-fill me-1"></i> Av. Wilson 123, Lima, Perú
+			        </p>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-telephone-fill me-1"></i> +51 987 654 321
+			        </p>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-envelope-fill me-1"></i> info@tecnologia.com
+			        </p>
+			      </div>
+
+			    </div>
+
+			    <hr class="my-8 border-gray-700">
+
+			    <p class="text-center text-gray-500 text-sm">
+			      © 2026 TechNova. Todos los derechos reservados.
+			    </p>
+			  </div>
+			</footer>
+	</body>
+
+</html>
+	

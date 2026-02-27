@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar / Editar Producto</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 font-poppins">
+
+<!-- Header -->
+<div class="fixed top-0 w-full z-50 bg-white shadow-md flex items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-3 text-lg font-semibold text-gray-800">
+        <i class="fa-solid fa-boxes-stacked text-blue-500"></i>
+        Panel de Administración - Tecnología
+    </div>
+	<div class="text-gray-700">
+	        Bienvenido: <span class="font-semibold" th:text="${adminNombre}">Admin</span>
+			<div class="text-gray-600 text-sm" id="reloj">00/00/0000 00:00</div>
+	    </div>
+</div>
+
+<div class="flex pt-20 min-h-screen">
+
+	<!-- SIDEBAR -->
+	    <aside class="w-64 bg-gray-800 text-gray-200 fixed top-20 left-0 h-[calc(100vh-5rem)] shadow-lg">
+	        <nav class="flex flex-col mt-4 gap-1 px-3">
+	            <a th:href="@{/PaginaAdmin/PanelAdmin}"
+	               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700">
+	                <i class="fa fa-chart-line text-blue-400"></i> Dashboard
+	            </a>
+
+	            <a th:href="@{/mantenimientoProductos/lista}"
+	               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-600 mt-auto">
+	                <i class="fa fa-plus text-blue-400"></i> Productos
+	            </a>
+
+	            <a th:href="@{/mantenimientoProductos/nuevo}"
+	               class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-700 text-white">
+	                <i class="fa fa-box text-blue-400"></i> Nuevo Producto
+	            </a>
+
+	            <a th:href="@{/logout}"
+	               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 mt-auto">
+	                <i class="fa fa-right-from-bracket text-red-400"></i> Cerrar sesión
+	            </a>
+	        </nav>
+	    </aside>
+
+    <!-- Contenido -->
+    <div class="ml-60 flex-1 p-8">
+        <div class="max-w-4xl mx-auto">
+
+            <div class="card shadow-lg rounded-2xl">
+                <div class="card-header bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center py-4">
+                    <h3 th:text="'✏️ Editar Descuento '"
+                        class="text-xl font-semibold"></h3>
+                </div>
+                <h4 class="fw-bold text-center mb-1 mt-3" th:text="  ${descuento.producto.nombre}">
+
+                </h4>
+
+                <div class="card-body p-6">
+
+                    <form th:action="@{/mantenimientoDescuentos/editar}"
+                          th:object="${descuento}"
+                          method="post">
+
+                        <input type="hidden" name="_method" value="put"/>
+
+                        <input type="hidden" th:field="*{idDescuento}"/>
+                        <input type="hidden"
+                               name="producto.idProducto"
+                               th:value="${descuento.producto.idProducto}">
+
+
+                        <!-- Porcentaje -->
+                        <div class="mb-3">
+                            <label class="form-label">Porcentaje Descuento</label>
+                            <input type="number"
+                                   name="porcentajeDescuento"
+                                   th:value="${(descuento.porcentajeDescuento * 100).intValue()}"
+                                   min="0" max="100"
+                                   step="1"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="mb-3">
+                            <label>Fecha inicio</label>
+                            <input type="date"
+                                   th:field="*{fechaInicio}"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Fecha fin</label>
+                            <input type="date"
+                                   th:field="*{fechaFin}"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <!-- Promoción -->
+                        <div class="mb-3">
+                            <label class="form-label">Promoción</label>
+                            <select class="form-select"
+                                    name="promocion.idPromocion"
+                                    required>
+
+                                <option value="">-- Seleccione --</option>
+
+                                <option th:each="p : ${promociones}"
+                                        th:value="${p.idPromocion}"
+                                        th:text="${p.nombrePromo}"
+                                        th:selected="${descuento.promocion != null
+                          and descuento.promocion.idPromocion == p.idPromocion}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Botón -->
+                        <div class="text-center mt-4">
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg px-5">
+                                <i class="fa-solid fa-floppy-disk"></i> Guardar
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <!-- Mensajes -->
+                    <div th:if="${msg == 'ok'}" class="alert alert-success mt-4 text-center">
+                        ✅ Descuento guardado correctamente
+                    </div>
+
+                    <div th:if="${msg == 'exception'}" class="alert alert-danger mt-4 text-center">
+                        ❌ Error al guardar el Descuento
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+
+	function actualizarReloj() {
+	    const ahora = new Date();
+	    const dia = String(ahora.getDate()).padStart(2, '0');
+	    const mes = String(ahora.getMonth() + 1).padStart(2, '0'); // Enero = 0
+	    const anio = ahora.getFullYear();
+	    const hora = String(ahora.getHours()).padStart(2, '0');
+	    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+	    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+	    document.getElementById('reloj').innerText = `${dia}/${mes}/${anio} ${hora}:${minutos}:${segundos}`;
+	}
+
+	// Actualiza cada segundo
+	setInterval(actualizarReloj, 1000);
+	actualizarReloj(); 
+</script>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tienda de Tecnología</title>
+
+	
+  
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+	
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/PaginaWeb.css}">
+  <link rel="icon" th:href="@{/img/logo.jpg}" type="image/jpg">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+  
+
+
+</head>
+
+<body class="min-h-screen text-white 
+bg-gradient-to-br from-[#0a1f44] via-[#0f2a5f] to-[#1b1f3b]">
+
+	<!-- NAVBAR-->
+	<nav class="fixed top-0 w-full 
+	bg-[#020617]/70 backdrop-blur-xl
+	border-b border-cyan-400/20 
+	text-white shadow z-50">
+	  <div class="max-w-7xl mx-auto px-6">
+	    <div class="flex justify-between items-center h-16">
+
+	      <!-- Logo -->
+	      <a th:href="@{/PaginaWeb/index}" class="text-xl font-bold text-cyan-400 tracking-wider">
+	        💻 TechNova
+	      </a>
+
+	      <!-- Botón móvil -->
+	      <button id="menuBtn" class="md:hidden text-2xl">
+	        ☰
+	      </button>
+
+	      <!-- Links -->
+	      <ul id="menu"
+	          class="hidden md:flex gap-6 items-center">
+
+	        <li><a th:href="@{/PaginaWeb/index}" class="hover:text-cyan-400 transition">Inicio</a></li>
+	        <li><a th:href="@{/catalogo}" class="hover:text-cyan-400 transition">Productos</a></li>
+
+	        <!-- Dropdown Categorías -->
+	        <li class="relative group">
+	          <span class="cursor-pointer hover:text-cyan-400 transition">Categorías</span>
+	          <ul class="absolute hidden group-hover:block bg-gray-800 mt-2 rounded shadow w-48">
+	            <li th:each="c : ${categorias}">
+	              <a th:href="@{'/catalogo?categoria=' + ${c.idCategoria}}"
+	                 th:text="${c.nombreCategoria}"
+	                 class="block px-4 py-2 hover:bg-red-500">
+	              </a>
+	            </li>
+	          </ul>
+	        </li>
+
+			<li><a th:href="@{/nosotros}" class="hover:text-cyan-400 transition">Nosotros</a></li>
+			      <li><a th:href="@{/contacto}" class="hover:text-cyan-400 transition">Contacto</a></li>
+
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/login}" class="bg-red-600 px-3 py-1 rounded">Login</a>
+			      </li>
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/register}" class="border px-3 py-1 rounded">Registro</a>
+			      </li>
+				  <li sec:authorize="isAuthenticated()" class="flex items-center gap-4">
+
+				    <!-- 🛒 CARRITO -->
+				    <a th:href="@{/carrito}"
+				       class="relative hover:text-red-500 transition"
+				       title="Ver carrito">
+
+				      🛒
+				      <!-- contador  -->
+					  <span th:if="${carritoCount > 0}"
+					        th:text="${carritoCount}"
+					        class="absolute -top-2 -right-3 
+					               bg-red-600 text-xs px-1.5 
+					               rounded-full">
+					  </span>
+				    </a>
+					<!--Usuario-->
+					<div class="relative group">
+
+					  <!-- Texto principal -->
+					  <span class="text-sm cursor-pointer hover:text-cyan-400 transition">
+					    Hola, <strong th:text="${nombreCom}"></strong> ⌄
+					  </span>
+
+					  <!-- Dropdown -->
+					  <ul class="absolute right-0 mt-2 w-40
+					         bg-[#020617] border border-cyan-400/20
+					         rounded-lg shadow-lg
+					         opacity-0 invisible
+					         group-hover:opacity-100 group-hover:visible
+					         transition-all duration-200 ease-in-out">
+
+					    <li>
+					      <a th:href="@{/perfil}"
+					         class="block px-4 py-2 hover:bg-cyan-600 hover:text-white rounded-lg">
+					        👤 Mi Perfil
+					      </a>
+					    </li>
+
+					  </ul>
+
+					</div>
+
+				  <li sec:authorize="isAuthenticated()">
+				    <a th:href="@{/logout}"
+				       class="border px-3 py-1 rounded hover:bg-red-600 transition">
+				      Salir
+				    </a>
+				  </li>
+			    </ul>
+			  </div>
+			</nav>
+			
+			<section id="inicio" class="mt-20 relative overflow-hidden">
+
+			  <!-- CONTENEDOR -->
+			  <div id="tailwindCarousel"
+			       class="flex transition-transform duration-700 ease-in-out">
+
+				   <!--  Slide Principal TechNova -->
+				   <div class="min-w-full relative">
+				     <img src="/img/banner2.jpg" class="w-full h-[550px] object-cover">
+
+				     <div class="absolute inset-0
+				          bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent
+				          flex flex-col justify-center items-center text-white text-center">
+						  	
+						  <h1 class="text-5xl font-extrabold tracking-widest mb-4
+						             drop-shadow-[0_0_25px_rgba(34,211,238,0.8)]">
+				         TechNova
+				       </h1>
+
+				       <p class="mb-6 text-gray-300 text-lg">
+				         Tecnología de alto rendimiento para gamers y profesionales
+				       </p>
+
+				       <a th:href="@{/catalogo}"
+				          class="bg-cyan-400 hover:bg-cyan-300
+				                 text-slate-900 px-8 py-3 rounded-xl
+				                 font-semibold tracking-wide
+				                 shadow-[0_0_20px_rgba(34,211,238,0.6)]
+				                 transition">
+				          Ver Productos
+				       </a>
+
+				     </div>
+				   </div>
+
+			  
+
+				<!--  Periféricos -->
+				<div class="min-w-full relative">
+				  <img src="/img/perifericos.jpg" class="w-full h-[550px] object-cover">
+				  <div class="absolute inset-0
+				       bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent
+				       flex flex-col justify-center items-center text-white">
+				    <h1 class="text-4xl font-bold">Experiencia total</h1>
+				    <p class="mb-4 text-gray-300">Periféricos Gaming & Oficina</p>
+					<a th:href="@{/catalogo(categoria=1)}"
+									   class="bg-cyan-400 text-slate-900 px-6 py-3 rounded-xl font-semibold">
+									   Ver Perifericos
+									</a>
+				  </div>
+				</div>
+
+				<!-- ⚙ Procesadores -->
+				<div class="min-w-full relative">
+				  <img src="/img/procesadores.jpg" class="w-full h-[550px] object-cover">
+				  <div class="absolute inset-0
+				       bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent
+				       flex flex-col justify-center items-center text-white">
+				    <h1 class="text-4xl font-bold">Potencia pura</h1>
+				    <p class="mb-4 text-gray-300">Procesadores Intel & AMD</p>
+					<a th:href="@{/catalogo(categoria=2)}"
+					   class="bg-cyan-400 text-slate-900 px-6 py-3 rounded-xl font-semibold">
+					   Ver Procesadores
+					</a>
+				  </div>
+				</div>
+				
+				
+				<!-- Tarjetas de Video -->
+				<div class="min-w-full relative">
+				  <img src="/img/tarjetavideo.jpg" class="w-full h-[550px] object-cover">
+
+				  <div class="absolute inset-0
+				       bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent
+				       flex flex-col justify-center items-center text-white">
+
+				    <h1 class="text-4xl font-bold">Potencia Gráfica Extrema</h1>
+
+				    <p class="mb-4 text-gray-300">
+				      Tarjetas de Video para Gaming y Diseño Profesional
+				    </p>
+
+				    <a th:href="@{/catalogo(categoria=3)}"
+				       class="bg-cyan-400 text-slate-900 px-6 py-3 rounded-xl font-semibold">
+				       Ver Tarjetas de Video
+				    </a>
+
+				  </div>
+				</div>
+				
+				<!-- 🖥 Monitores -->
+				<div class="min-w-full relative">
+				  <img src="/img/monitores.jpg" class="w-full h-[550px] object-cover">
+				  <div class="absolute inset-0
+				       bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent
+				       flex flex-col justify-center items-center text-white">
+				    <h1 class="text-4xl font-bold">Visualiza el futuro</h1>
+				    <p class="mb-4 text-gray-300">Monitores Full HD & Gaming</p>
+					<a th:href="@{/catalogo(categoria=6)}"
+										   class="bg-cyan-400 text-slate-900 px-6 py-3 rounded-xl font-semibold">
+										   Ver Monitores
+										</a>
+				  </div>
+				</div>
+			  </div>
+
+			  <!-- BOTONES -->
+			  <button onclick="prevSlide()"
+			          class="absolute left-5 top-1/2 -translate-y-1/2
+			                 bg-slate-900/70 text-cyan-400
+			                 px-4 py-3 rounded-full
+			                 hover:bg-cyan-400 hover:text-black transition">
+			    ❮
+			  </button>
+
+			  <button onclick="nextSlide()"
+			          class="absolute right-5 top-1/2 -translate-y-1/2
+			                 bg-slate-900/70 text-cyan-400
+			                 px-4 py-3 rounded-full
+			                 hover:bg-cyan-400 hover:text-black transition">
+			    ❯
+			  </button>
+		
+			  <!-- INDICADORES -->
+			  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+			    <button class="dot"></button>
+			    <button class="dot"></button>
+			    <button class="dot"></button>
+			    <button class="dot"></button>
+				<button class="dot"></button>
+			  </div>
+			</section>
+			
+			<!--  CARRUSEL NOVEDADES -->
+			<section class="relative mt-20 w-full px-4 py-16 
+			                bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
+
+			  <!-- Glow decorativo fondo -->
+			  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px]
+			              bg-cyan-500/10 blur-[140px] rounded-full pointer-events-none"></div>
+
+			  <!-- TÍTULO -->
+			  <div class="text-center mb-16 relative z-10">
+				<h2 class="text-4xl md:text-5xl font-extrabold tracking-widest text-white">
+			      NOVEDADES
+			    </h2>
+				<div class="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-600 mx-auto mt-4 rounded-full"></div>
+			    <p class="text-gray-400 mt-4 text-lg">
+			      Descubre lo último en tecnología
+			    </p>
+			  </div>
+
+			  <div class="relative max-w-[1600px] mx-auto">
+
+			    <!-- FADE IZQUIERDA -->
+			    <div class="pointer-events-none absolute left-0 top-0 h-full w-32
+			                bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
+
+			    <!-- FADE DERECHA -->
+			    <div class="pointer-events-none absolute right-0 top-0 h-full w-32
+			                bg-gradient-to-l from-black via-black/80 to-transparent z-10"></div>
+
+			    <!-- ⬅️ BOTÓN IZQUIERDO -->
+			    <button id="prevNovedades"
+			      class="absolute left-4 top-1/2 -translate-y-1/2 z-20
+			             bg-slate-800/70 backdrop-blur
+			             text-cyan-400 text-xl
+			             w-12 h-12 rounded-full
+			             hover:bg-cyan-400 hover:text-black
+			             transition-all duration-300 shadow-lg">
+			      ❮
+			    </button>
+
+			    <!-- 👉 CONTENEDOR SCROLL -->
+			    <div id="novedadesCarrusel"
+				class="flex gap-10 overflow-x-auto scroll-smooth px-16">
+
+			      <!-- 🔁 PRODUCTOS -->
+			      <div th:each="p : ${productos}"
+			           class="group min-w-[320px]
+			                  bg-gradient-to-b from-slate-900 to-slate-950
+			                  rounded-3xl overflow-hidden
+			                  border border-slate-800
+			                  shadow-[0_0_40px_rgba(0,0,0,0.8)]
+			                  transition-all duration-500
+			                  hover:-translate-y-3
+			                  hover:border-cyan-400/40
+			                  hover:shadow-[0_0_50px_rgba(34,211,238,0.25)]">
+
+			        <!-- IMAGEN -->
+			        <div class="relative overflow-hidden">
+			          <img th:src="@{'/img/' + ${p.imagen}}"
+			               th:alt="${p.nombre}"
+			               class="h-80 w-full object-cover
+			                      transition-transform duration-700
+			                      group-hover:scale-110">
+
+			          <!-- Overlay oscuro -->
+			          <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+
+			          <!-- BADGE -->
+			          <span class="absolute top-4 left-4
+			                       bg-gradient-to-r from-cyan-400 to-blue-500
+			                       text-black text-xs font-bold
+			                       px-4 py-1 rounded-full shadow-lg">
+			            NUEVO
+			          </span>
+			        </div>
+
+			        <!-- CONTENIDO -->
+			        <div class="p-6 text-white flex flex-col justify-between h-[200px]">
+
+			          <div>
+			            <h3 class="text-xl font-semibold mb-2 tracking-wide"
+			                th:text="${p.nombre}"></h3>
+
+			            <p class="text-gray-400 text-sm line-clamp-2"
+			               th:text="${p.descripcion}"></p>
+			          </div>
+
+			          <button
+			            class="mt-6 w-full
+			                   bg-gradient-to-r from-cyan-400 to-blue-500
+			                   hover:from-blue-500 hover:to-cyan-400
+			                   text-black font-semibold
+			                   py-3 rounded-xl
+			                   transition-all duration-300
+			                   shadow-lg hover:shadow-cyan-400/30"
+			            th:onclick="'window.location.href=\'/PaginaWeb/producto/detalle/' + ${p.idProducto} + '\''">
+			            Ver detalles →
+			          </button>
+			        </div>
+			      </div>
+
+			    </div>
+
+			    <!-- ➡️ BOTÓN DERECHO -->
+			    <button id="nextNovedades"
+			      class="absolute right-4 top-1/2 -translate-y-1/2 z-20
+			             bg-slate-800/70 backdrop-blur
+			             text-cyan-400 text-xl
+			             w-12 h-12 rounded-full
+			             hover:bg-cyan-400 hover:text-black
+			             transition-all duration-300 shadow-lg">
+			      ❯
+			    </button>
+
+			  </div>
+			</section>
+
+
+			<section class="relative mt-24 w-full px-6 py-18
+			                bg-gradient-to-b from-black via-slate-950 to-black overflow-hidden">
+
+			  <!-- Glow diferente (violeta / rojo oferta) -->
+			  <div class="absolute top-0 right-1/3 w-[500px] h-[500px]
+			              bg-violet-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+			  <!-- TÍTULO -->
+			  <div class="text-center mb-16 relative z-10">
+			    <h2 class="text-4xl md:text-5xl font-extrabold tracking-widest
+			               text-red-400
+			               drop-shadow-[0_0_20px_rgba(248,113,113,0.8)]">
+			      💸 OFERTAS IMPERDIBLES
+			    </h2>
+
+			    <div class="w-24 h-1 bg-gradient-to-r from-red-400 to-pink-600 mx-auto mt-4 rounded-full"></div>
+
+			    <p class="text-gray-400 mt-4 text-lg">
+			      Aprovecha estos descuentos exclusivos por tiempo limitado
+			    </p>
+			  </div>
+
+			  <!-- GRID DESCUENTOS -->
+			  <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+			    <div th:each="p : ${productoDescuento}"
+			         class="group relative
+			                bg-gradient-to-b from-slate-900 to-slate-950
+			                rounded-3xl overflow-hidden
+			                border border-slate-800
+			                shadow-[0_0_50px_rgba(0,0,0,0.9)]
+			                hover:-translate-y-4
+			                hover:shadow-[0_0_60px_rgba(239,68,68,0.3)]
+			                transition-all duration-500">
+
+			      <!-- IMAGEN -->
+			      <div class="relative overflow-hidden">
+			        <img th:src="@{'/img/' + ${p.producto.imagen}}"
+			             th:alt="${p.producto.nombre}"
+			             class="h-80 w-full object-cover
+			                    transition-transform duration-700
+			                    group-hover:scale-110">
+
+			        <!-- Badge % -->
+			        <span class="absolute top-6 left-6
+			                     bg-red-500 text-white text-sm font-bold
+			                     px-5 py-2 rounded-full shadow-lg">
+			          -<span th:text="${p.porcentajeDescuento}"></span>% OFF
+			        </span>
+			      </div>
+
+			      <!-- CONTENIDO -->
+			      <div class="p-8 text-white">
+
+			        <h3 class="text-2xl font-semibold mb-3 tracking-wide"
+			            th:text="${p.producto.nombre}"></h3>
+
+			        <p class="text-gray-400 text-sm mb-6 line-clamp-2"
+			           th:text="${p.producto.descripcion}"></p>
+
+			        <!-- PRECIOS -->
+			        <div class="flex items-center gap-4 mb-6">
+			          <span class="text-gray-500 line-through text-lg"
+			               th:text="'S/ ' + ${#numbers.formatDecimal(p.producto.precio, 1, 2)}"></span>
+
+			          <span class="text-3xl font-bold text-red-400
+			                       drop-shadow-[0_0_10px_rgba(248,113,113,0.8)]"
+			                th:text="'S/ ' + ${#numbers.formatDecimal(p.precioConDescuento, 1, 2)}"></span>
+			        </div>
+
+			        <!-- BOTÓN -->
+			        <button
+			          class="w-full bg-gradient-to-r from-red-500 to-pink-500
+			                 hover:from-pink-500 hover:to-red-500
+			                 text-white font-semibold py-3 rounded-xl
+			                 transition-all duration-300 shadow-lg
+			                 hover:shadow-red-500/40"
+			          th:onclick="'window.location.href=\'/PaginaWeb/producto/detalle/' + ${p.producto.idProducto} + '\''">
+			          Comprar con descuento →
+			        </button>
+
+			      </div>
+
+			    </div>
+
+			  </div>
+			</section>
+
+<!-- ⚫ FOOTER -->
+<footer class="bg-[#020617]/80 backdrop-blur 
+text-gray-300 border-t border-cyan-400/20">
+
+  <div class="container mx-auto px-6 py-12">
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 text-center md:text-left">
+
+      <!-- Logo / descripción -->
+      <div>
+        <h2 class="text-2xl font-bold text-red-500 mb-3"> 💻 TechNova</h2>
+        <p class="text-gray-400 text-sm">
+          La mejor experiencia de tecnologia, con promociones, descuentos y preventas exclusivas para nuestros clientes.
+        </p>
+      </div>
+
+      <!-- Enlaces -->
+      <div>
+        <h3 class="font-semibold mb-3">Enlaces</h3>
+        <ul class="space-y-2 list-none p-0 m-0">
+          <li><a th:href="@{/PaginaWeb/index}" class="hover:text-red-500">Inicio</a></li>
+          <li><a th:href="@{/cartelera}" class="hover:text-red-500">Productos</a></li>
+          <li><a th:href="@{/nosotros}" class="hover:text-red-500">Nosotros</a></li>
+          <li><a th:href="@{/contacto}" class="hover:text-red-500">Contacto</a></li>
+        </ul>
+      </div>
+
+
+      <!-- Contacto -->
+      <div>
+        <h3 class="font-semibold mb-3">Contacto</h3>
+        <p class="text-sm text-gray-400">
+          <i class="bi bi-geo-alt-fill me-1"></i> Av. Wilson 123, Lima, Perú
+        </p>
+        <p class="text-sm text-gray-400">
+          <i class="bi bi-telephone-fill me-1"></i> +51 987 654 321
+        </p>
+        <p class="text-sm text-gray-400">
+          <i class="bi bi-envelope-fill me-1"></i> info@tecnologia.com
+        </p>
+      </div>
+
+    </div>
+
+    <hr class="my-8 border-gray-700">
+
+    <p class="text-center text-gray-500 text-sm">
+      © 2026 TechNova. Todos los derechos reservados.
+    </p>
+  </div>
+</footer>
+
+	<script src="/script/PaginaWeb.js"></script>
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+// CARRUSEL HERO //
+
+  const heroCarousel = document.getElementById('tailwindCarousel');
+  if (heroCarousel) {
+
+    const slides = heroCarousel.children.length;
+    const dots = document.querySelectorAll('.dot');
+    let index = 0;
+    let autoSlide;
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('bg-cyan-400', i === index);
+        dot.classList.toggle('bg-slate-500', i !== index);
+      });
+    }
+
+    function updateCarousel() {
+      heroCarousel.style.transform = `translateX(-${index * 100}%)`;
+      heroCarousel.style.transition = 'transform 0.8s ease-in-out';
+      updateDots();
+    }
+
+    window.nextSlide = function () {
+      index = (index + 1) % slides;
+      updateCarousel();
+    };
+
+    window.prevSlide = function () {
+      index = (index - 1 + slides) % slides;
+      updateCarousel();
+    };
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        index = i;
+        updateCarousel();
+      });
+    });
+
+    function startAutoSlide() {
+      autoSlide = setInterval(nextSlide, 6000);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlide);
+    }
+
+    startAutoSlide();
+
+    heroCarousel.addEventListener('mouseenter', stopAutoSlide);
+    heroCarousel.addEventListener('mouseleave', startAutoSlide);
+  }
+
+  /* =========================
+     CARRUSEL NOVEDADES
+  ========================== */
+
+  const novedadesCarousel = document.getElementById('novedadesCarrusel');
+  const btnNext = document.getElementById('nextNovedades');
+  const btnPrev = document.getElementById('prevNovedades');
+
+  if (novedadesCarousel && btnNext && btnPrev) {
+
+    const scrollAmount = 360; 
+
+    function isAtEnd() {
+      return novedadesCarousel.scrollLeft + novedadesCarousel.clientWidth
+             >= novedadesCarousel.scrollWidth - 5;
+    }
+
+    function isAtStart() {
+      return novedadesCarousel.scrollLeft <= 0;
+    }
+
+    btnNext.addEventListener('click', () => {
+
+      if (isAtEnd()) {
+        // vuelve al inicio
+        novedadesCarousel.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
+      } else {
+        novedadesCarousel.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+
+    });
+
+    btnPrev.addEventListener('click', () => {
+
+      if (isAtStart()) {
+        // va al final
+        novedadesCarousel.scrollTo({
+          left: novedadesCarousel.scrollWidth,
+          behavior: 'smooth'
+        });
+      } else {
+        novedadesCarousel.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+
+    });
+	}
+	});  
+</script>
+
+
+</html>

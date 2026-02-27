@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos - Panel Admin</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+</head>
+
+<body class="bg-gray-100 font-[Poppins]">
+
+<!-- HEADER -->
+<div class="fixed top-0 w-full z-50 bg-white shadow-md flex items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-3 text-lg font-semibold text-gray-800">
+        <i class="fa-solid fa-boxes-stacked text-blue-600"></i>
+        Panel de Administración - Tienda Tecnológica
+    </div>
+    <div class="text-gray-700">
+        Bienvenido: <span class="font-semibold" th:text="${adminNombre}">Admin</span>
+		<div class="text-gray-600 text-sm" id="reloj">00/00/0000 00:00</div>
+    </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="flex pt-20 min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-gray-800 text-gray-200 fixed top-20 left-0 h-[calc(100vh-5rem)] shadow-lg">
+        <nav class="flex flex-col mt-4 gap-1 px-3">
+            <a th:href="@{/PaginaAdmin/PanelAdmin}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700">
+                <i class="fa fa-chart-line text-blue-400"></i> Dashboard
+            </a>
+
+            <a th:href="@{/mantenimientoProductos/lista}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-700 text-white">
+                <i class="fa fa-box text-blue-400"></i> Productos
+            </a>
+
+            <a th:href="@{/mantenimientoProductos/nuevo}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700">
+                <i class="fa fa-plus text-blue-400"></i> Nuevo Producto
+            </a>
+			
+            <a th:href="@{/logout}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 mt-auto">
+                <i class="fa fa-right-from-bracket text-red-400"></i> Cerrar sesión
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="ml-64 flex-1 p-8">
+
+        <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
+            Gestión de Productos
+        </h2>
+
+        <!-- CONTADORES -->
+        <div class="grid grid-cols-3 gap-6 mb-6">
+            <div class="bg-white shadow rounded-lg p-4 text-center">
+                <h5 class="text-gray-500">Productos Activos</h5>
+                <p class="text-3xl font-bold text-green-600" th:text="${activos}">0</p>
+            </div>
+
+            <div class="bg-white shadow rounded-lg p-4 text-center">
+                <h5 class="text-gray-500">Productos Inactivos</h5>
+                <p class="text-3xl font-bold text-red-600" th:text="${inactivos}">0</p>
+            </div>
+
+            <div class="bg-white shadow rounded-lg p-4 text-center">
+                <h5 class="text-gray-500">Total</h5>
+                <p class="text-3xl font-bold text-blue-600" th:text="${total}">0</p>
+            </div>
+        </div>
+		
+        <!-- FILTROS -->
+        <div class="flex gap-3 mb-4 justify-center">
+            <a th:href="@{/mantenimientoProductos/lista}"
+               class="btn btn-secondary"
+               th:classappend="${estadoActual == null} ? 'active' : ''">
+                Todos
+            </a>
+
+            <a th:href="@{/mantenimientoProductos/lista(estado='ACTIVO')}"
+               class="btn btn-success"
+               th:classappend="${estadoActual == 'ACTIVO'} ? 'active' : ''">
+                Activos
+            </a>
+
+            <a th:href="@{/mantenimientoProductos/lista(estado='INACTIVO')}"
+               class="btn btn-danger"
+               th:classappend="${estadoActual == 'INACTIVO'} ? 'active' : ''">
+                Inactivos
+            </a>
+        </div>
+
+        <!-- TABLA -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <table id="tablaProductos" class="table table-striped table-hover table-bordered w-full">
+                <thead class="table-dark text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Categorías</th>
+                    <th>Estado</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="p : ${listaproductos}" class="text-center align-middle">
+                    <td th:text="${p.idProducto}"></td>
+
+                    <td>
+                        <img th:src="@{/img/{img}(img=${p.imagen})}"
+                             class="w-16 h-16 object-cover rounded mx-auto">
+                    </td>
+
+                    <td th:text="${p.nombre}"></td>
+                    <td th:text="'S/. ' + ${p.precio}"></td>
+                    <td th:text="${p.stock}"></td>
+
+                    <td>
+                        <span th:each="c : ${p.categoria}"
+                              th:text="${c.nombre_Categoria + ' '}"></span>
+                    </td>
+
+                    <td>
+                        <span th:text="${p.estado}"
+                              th:class="${p.estado=='ACTIVO'} ? 'badge bg-success' : 'badge bg-danger'">
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="flex gap-2 justify-center">
+							<a th:href="@{/mantenimientoProductos/editar/{id}(id=${p.idProducto})}"
+							   class="btn btn-warning btn-sm">
+							    <i class="fa fa-edit"></i>
+							</a>
+
+							<a th:href="@{/mantenimientoProductos/ver/{id}(id=${p.idProducto})}"
+							   class="btn btn-info btn-sm">
+							   <i class="fa fa-eye"></i>
+							</a>
+							<a href="#"
+							   class="btn btn-sm"
+							   th:classappend="${p.estado=='ACTIVO'} ? 'btn-danger' : 'btn-success'"
+							   data-bs-toggle="modal"
+							   data-bs-target="#modalEstado"
+							   th:data-id="${p.idProducto}">
+							    <i class="fa fa-power-off"></i>
+							</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+	
+	<div class="modal fade" id="modalEstado" tabindex="-1">
+	  <div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+	      
+	      <div class="modal-header">
+	        <h5 class="modal-title">Confirmar acción</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+
+	      <div class="modal-body">
+	        ¿Seguro que deseas cambiar el estado de este producto?
+	      </div>
+
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+	          Cancelar
+	        </button>
+
+	        <a id="btnConfirmarEstado" class="btn btn-danger">
+	          Sí, cambiar estado
+	        </a>
+	      </div>
+
+	    </div>
+	  </div>
+	</div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#tablaProductos').DataTable({
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+            },
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            columnDefs: [
+                { orderable: false, targets: [1, 7] }
+            ]
+        });
+    });
+	
+		function actualizarReloj() {
+		    const ahora = new Date();
+		    const dia = String(ahora.getDate()).padStart(2, '0');
+		    const mes = String(ahora.getMonth() + 1).padStart(2, '0'); // Enero = 0
+		    const anio = ahora.getFullYear();
+		    const hora = String(ahora.getHours()).padStart(2, '0');
+		    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+		    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+		    document.getElementById('reloj').innerText = `${dia}/${mes}/${anio} ${hora}:${minutos}:${segundos}`;
+		}
+
+		// Actualiza cada segundo
+		setInterval(actualizarReloj, 1000);
+		actualizarReloj(); 
+		
+		
+		document.addEventListener("DOMContentLoaded", function () {
+
+		    const modal = document.getElementById('modalEstado');
+		    const btnConfirmar = document.getElementById('btnConfirmarEstado');
+
+		    modal.addEventListener('show.bs.modal', function (event) {
+		        const button = event.relatedTarget;
+		        const idProducto = button.getAttribute('data-id');
+
+				btnConfirmar.href = `/mantenimientoProductos/estado/${idProducto}`;
+		    });
+
+		});
+</script>
+
+</body>
+</html>

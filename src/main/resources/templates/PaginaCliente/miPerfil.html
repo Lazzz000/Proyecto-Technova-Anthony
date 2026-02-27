@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tienda de Tecnología</title>
+
+	
+  
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+	
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/PaginaWeb.css}">
+  <link rel="icon" th:href="@{/img/logo.jpg}" type="image/jpg">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+  
+
+
+</head>
+
+<body class="min-h-screen text-white 
+bg-gradient-to-br from-[#0a1f44] via-[#0f2a5f] to-[#1b1f3b]">
+
+	<!-- NAVBAR-->
+	<nav class="fixed top-0 w-full 
+	bg-[#020617]/70 backdrop-blur-xl
+	border-b border-cyan-400/20 
+	text-white shadow z-50">
+	  <div class="max-w-7xl mx-auto px-6">
+	    <div class="flex justify-between items-center h-16">
+
+	      <!-- Logo -->
+	      <a th:href="@{/PaginaWeb/index}" class="text-xl font-bold text-cyan-400 tracking-wider">
+	        💻 TechNova
+	      </a>
+
+	      <!-- Botón móvil -->
+	      <button id="menuBtn" class="md:hidden text-2xl">
+	        ☰
+	      </button>
+
+	      <!-- Links -->
+	      <ul id="menu"
+	          class="hidden md:flex gap-6 items-center">
+
+	        <li><a th:href="@{/PaginaWeb/index}" class="hover:text-cyan-400 transition">Inicio</a></li>
+	        <li><a th:href="@{/productos}" class="hover:text-cyan-400 transition">Productos</a></li>
+
+	        <!-- Dropdown Categorías -->
+	        <li class="relative group">
+	          <span class="cursor-pointer hover:text-cyan-400 transition">Categorías</span>
+	          <ul class="absolute hidden group-hover:block bg-gray-800 mt-2 rounded shadow w-48">
+	            <li th:each="c : ${categorias}">
+	              <a th:href="@{'/productos/categoria/' + ${c.idCategoria}}"
+	                 th:text="${c.nombreCategoria}"
+	                 class="block px-4 py-2 hover:bg-red-500">
+	              </a>
+	            </li>
+	          </ul>
+	        </li>
+
+			<li><a th:href="@{/nosotros}" class="hover:text-cyan-400 transition">Nosotros</a></li>
+			      <li><a th:href="@{/contacto}" class="hover:text-cyan-400 transition">Contacto</a></li>
+
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/login}" class="bg-red-600 px-3 py-1 rounded">Login</a>
+			      </li>
+			      <li sec:authorize="!isAuthenticated()">
+			        <a th:href="@{/register}" class="border px-3 py-1 rounded">Registro</a>
+			      </li>
+				  <li sec:authorize="isAuthenticated()" class="flex items-center gap-4">
+
+				    <!-- 🛒 CARRITO -->
+				    <a th:href="@{/carrito}"
+				       class="relative hover:text-red-500 transition"
+				       title="Ver carrito">
+
+				      🛒
+				      <!-- contador  -->
+					  <span th:if="${carritoCount > 0}"
+					        th:text="${carritoCount}"
+					        class="absolute -top-2 -right-3 
+					               bg-red-600 text-xs px-1.5 
+					               rounded-full">
+					  </span>
+				    </a>
+					<!--Usuario-->
+					<div class="relative group">
+
+					  <!-- Texto principal -->
+					  <span class="text-sm cursor-pointer hover:text-cyan-400 transition">
+					    Hola, <strong th:text="${nombreCom}"></strong> ⌄
+					  </span>
+
+					  <!-- Dropdown -->
+					  <ul class="absolute right-0 mt-2 w-40
+					         bg-[#020617] border border-cyan-400/20
+					         rounded-lg shadow-lg
+					         opacity-0 invisible
+					         group-hover:opacity-100 group-hover:visible
+					         transition-all duration-200 ease-in-out">
+
+					    <li>
+					      <a th:href="@{/perfil}"
+					         class="block px-4 py-2 hover:bg-cyan-600 hover:text-white rounded-lg">
+					        👤 Mi Perfil
+					      </a>
+					    </li>
+
+					  </ul>
+
+					</div>
+
+				  <li sec:authorize="isAuthenticated()">
+				    <a th:href="@{/logout}"
+				       class="border px-3 py-1 rounded hover:bg-red-600 transition">
+				      Salir
+				    </a>
+				  </li>
+			    </ul>
+			  </div>
+			</nav>
+			<!-- ===================== PERFIL ===================== -->
+			<section class="pt-24 min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white">
+
+			  <div class="max-w-7xl mx-auto px-6">
+
+			    <div class="flex">
+
+			      <!-- ===================== SIDEBAR ===================== -->
+			      <div class="w-1/4 bg-[#020617]/70 p-8 border-r border-white/10 min-h-[80vh] rounded-l-2xl">
+
+			        <!-- AVATAR -->
+			        <div class="flex flex-col items-center mb-10">
+
+			          <div class="w-24 h-24 rounded-full bg-cyan-600 
+			                      flex items-center justify-center 
+			                      text-3xl font-bold text-white shadow-lg">
+
+			            <span th:text="${#strings.substring(cliente.nombres,0,1)
+			                            + #strings.substring(cliente.apellidos,0,1)}">
+			            </span>
+
+			          </div>
+
+			          <p class="mt-4 text-lg font-semibold text-cyan-400 text-center"
+			             th:text="${cliente.nombres + ' ' + cliente.apellidos}">
+			          </p>
+
+			          <p class="text-sm text-gray-400"
+			             th:text="${usuario.correo}">
+			          </p>
+
+			        </div>
+
+			        <!-- MENÚ -->
+			        <h2 class="text-xl font-semibold mb-6 text-white">
+			          Configuración
+			        </h2>
+
+			        <ul class="space-y-3">
+
+			          <li>
+			            <button onclick="mostrarSeccion('editar', this)"
+			              class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-cyan-600/30 transition">
+			              Editar perfil
+			            </button>
+			          </li>
+
+			          <li>
+			            <button onclick="mostrarSeccion('password', this)"
+			              class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-cyan-600/30 transition">
+			              Cambiar contraseña
+			            </button>
+			          </li>
+
+			          <li>
+			            <button onclick="mostrarSeccion('desactivar', this)"
+			              class="menu-btn w-full text-left px-4 py-3 rounded-xl text-red-400 hover:bg-red-600/20 transition">
+			              Desactivar cuenta
+			            </button>
+			          </li>
+
+					  <li>
+					  		  <button onclick="mostrarSeccion('historial', this)"
+					  		 class="menu-btn w-full text-left px-4 py-3 rounded-xl hover:bg-cyan-600/30 transition">
+					  		 Historial de pedidos
+					  		</button>
+					  </li>
+
+			        </ul>
+
+			      </div>
+			      <!-- ===================== FIN SIDEBAR ===================== -->
+
+
+			      <!-- ===================== CONTENIDO ===================== -->
+			      <div class="w-3/4 p-10 bg-[#0f172a]/40 rounded-r-2xl">
+
+			        <!-- ALERTAS -->
+			        <div th:if="${param.ok}" 
+			             class="mb-6 bg-green-600/20 border border-green-400 text-green-300 px-4 py-3 rounded-xl">
+			          ✔ Perfil actualizado correctamente
+			        </div>
+
+			        <div th:if="${param.passOk}" 
+			             class="mb-6 bg-green-600/20 border border-green-400 text-green-300 px-4 py-3 rounded-xl">
+			          ✔ Contraseña actualizada correctamente
+			        </div>
+
+			        <div th:if="${param.errorPass}" 
+			             class="mb-6 bg-red-600/20 border border-red-400 text-red-300 px-4 py-3 rounded-xl">
+			          ✖ La contraseña actual es incorrecta
+			        </div>
+
+			        <!-- ===================== EDITAR PERFIL ===================== -->
+			        <div id="editar">
+			          <h3 class="text-3xl font-semibold mb-8">Editar Perfil</h3>
+
+			          <form th:action="@{/perfil/guardar}" method="post" class="space-y-6">
+
+			            <input type="hidden" 
+			                   name="idCliente" 
+			                   th:value="${cliente.idCliente}">
+
+			            <div>
+			              <label class="block mb-2 text-sm text-gray-400">Nombres</label>
+			              <input type="text"
+			                     name="nombres"
+			                     th:value="${cliente.nombres}"
+			                     class="w-full p-4 rounded-xl bg-white/90 text-black focus:ring-2 focus:ring-cyan-500 outline-none">
+			            </div>
+
+			            <div>
+			              <label class="block mb-2 text-sm text-gray-400">Apellidos</label>
+			              <input type="text"
+			                     name="apellidos"
+			                     th:value="${cliente.apellidos}"
+			                     class="w-full p-4 rounded-xl bg-white/90 text-black focus:ring-2 focus:ring-cyan-500 outline-none">
+			            </div>
+
+			            <div>
+			              <label class="block mb-2 text-sm text-gray-400">Teléfono</label>
+			              <input type="text"
+			                     name="telefono"
+			                     th:value="${cliente.telefono}"
+			                     class="w-full p-4 rounded-xl bg-white/90 text-black focus:ring-2 focus:ring-cyan-500 outline-none">
+			            </div>
+
+			            <div>
+			              <label class="block mb-2 text-sm text-gray-400">Fecha de nacimiento</label>
+			              <input type="date"
+			                     th:value="${cliente.fechaNacimiento}"
+			                     disabled
+			                     class="w-full p-4 rounded-xl bg-gray-700 text-gray-400 cursor-not-allowed">
+			            </div>
+
+			            <button class="bg-cyan-500 hover:bg-cyan-600 px-8 py-3 rounded-xl font-semibold transition shadow-lg">
+			              Guardar cambios
+			            </button>
+
+			          </form>
+			        </div>
+
+
+			        <!-- ===================== CAMBIAR PASSWORD ===================== -->
+			        <div id="password" class="hidden">
+			          <h3 class="text-3xl font-semibold mb-8">Cambiar Contraseña</h3>
+
+			          <form th:action="@{/perfil/cambiar-password}" method="post" class="space-y-6">
+
+			            <input type="password" name="actual"
+			                   placeholder="Contraseña actual"
+			                   class="w-full p-4 rounded-xl bg-white/90 text-black focus:ring-2 focus:ring-cyan-500 outline-none">
+
+			            <input type="password" name="nueva"
+			                   placeholder="Nueva contraseña"
+			                   class="w-full p-4 rounded-xl bg-white/90 text-black focus:ring-2 focus:ring-cyan-500 outline-none">
+
+			            <button class="bg-cyan-500 hover:bg-cyan-600 px-8 py-3 rounded-xl font-semibold transition shadow-lg">
+			              Cambiar contraseña
+			            </button>
+
+			          </form>
+			        </div>
+
+
+			        <!-- ===================== DESACTIVAR ===================== -->
+			        <div id="desactivar" class="hidden">
+			          <h3 class="text-3xl font-semibold mb-6 text-red-400">
+			            Desactivar Cuenta
+			          </h3>
+
+			          <p class="mb-6 text-gray-400">
+			            Esta acción cambiará tu estado a Inactivo y cerrará tu sesión.
+			          </p>
+
+			          <form th:action="@{/perfil/desactivar}" method="post">
+			            <button type="submit"
+			                    onclick="return confirm('¿Seguro que deseas desactivar tu cuenta?')"
+			                    class="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-xl font-semibold transition shadow-lg">
+			              Confirmar Desactivación
+			            </button>
+			          </form>
+			        </div>
+					
+					<div id="historial" class="mt-12 hidden">
+								          <h3 class="text-3xl font-semibold mb-6">Historial de Pedidos</h3>
+								          <div th:if="${pedidos.size() == 0}" class="text-gray-400">No tienes pedidos aún.</div>
+								          <div th:each="pedido : ${pedidos}" class="mb-8 bg-[#020617]/50 rounded-2xl p-6 shadow-lg border border-cyan-400/20">
+								            <div class="flex justify-between items-center mb-4">
+								              <div>
+								                <p class="text-gray-300 font-semibold">Pedido ID: <span th:text="${pedido.idPedido}"></span></p>
+								                <p class="text-gray-400 text-sm">Fecha: 												<span th:if="${pedido.fechaPedido != null}"
+												      th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}"></span></p>
+								                <p class="text-gray-400 text-sm">Estado: <span th:text="${pedido.estado}"></span></p>
+								              </div>
+								              <div>
+								                <a th:href="@{'/checkout/pedido/exito/' + ${pedido.idPedido}}" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 rounded-xl font-semibold transition">Ver Detalle</a>
+								              </div>
+								            </div>
+								            <table class="w-full text-left border-collapse">
+								              <thead>
+								                <tr class="border-b border-gray-600">
+								                  <th class="py-2 px-4">Producto</th>
+								                  <th class="py-2 px-4">Cantidad</th>
+								                  <th class="py-2 px-4">Precio Unitario</th>
+								                  <th class="py-2 px-4">Subtotal</th>
+								                </tr>
+								              </thead>
+								              <tbody>
+								                <tr th:each="detalle : ${pedido.detalles}" class="border-b border-gray-700">
+								                  <td class="py-2 px-4 flex items-center gap-4">
+								                    <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
+								                      <img th:src="@{'/img/' + ${detalle.producto.imagen}}" th:alt="${detalle.producto.nombre}" class="w-full h-full object-contain hover:scale-105 transition">
+								                    </div>
+								                    <span th:text="${detalle.producto.nombre}"></span>
+								                  </td>
+								                  <td class="py-2 px-4" th:text="${detalle.cantidad}"></td>
+								                  <td class="py-2 px-4">S/ <span th:text="${detalle.precioUnitario}"></span></td>
+								                  <td class="py-2 px-4">S/ <span th:text="${detalle.subtotal}"></span></td>
+								                </tr>
+								              </tbody>
+								            </table>
+								            <div class="mt-4 text-right text-gray-300 font-semibold">Total: S/ <span th:text="${pedido.total}"></span></div>
+								          </div>
+								        </div>
+
+					
+
+			      </div>
+
+			    </div>
+			  </div>
+			</section>		
+			
+			
+<!-- ⚫ FOOTER -->
+	<footer class="bg-[#020617]/80 backdrop-blur 
+			text-gray-300 border-t border-cyan-400/20">
+
+			  <div class="container mx-auto px-6 py-12">
+
+			    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 text-center md:text-left">
+
+			      <!-- Logo / descripción -->
+			      <div>
+			        <h2 class="text-2xl font-bold text-red-500 mb-3"> 💻 TechNova</h2>
+			        <p class="text-gray-400 text-sm">
+			          La mejor experiencia de tecnologia, con promociones, descuentos y preventas exclusivas para nuestros clientes.
+			        </p>
+			      </div>
+
+			      <!-- Enlaces -->
+			      <div>
+			        <h3 class="font-semibold mb-3">Enlaces</h3>
+			        <ul class="space-y-2 list-none p-0 m-0">
+			          <li><a th:href="@{/PaginaWeb/index}" class="hover:text-red-500">Inicio</a></li>
+			          <li><a th:href="@{/cartelera}" class="hover:text-red-500">Productos</a></li>
+			          <li><a th:href="@{/nosotros}" class="hover:text-red-500">Nosotros</a></li>
+			          <li><a th:href="@{/contacto}" class="hover:text-red-500">Contacto</a></li>
+			        </ul>
+			      </div>
+
+
+			      <!-- Contacto -->
+			      <div>
+			        <h3 class="font-semibold mb-3">Contacto</h3>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-geo-alt-fill me-1"></i> Av. Wilson 123, Lima, Perú
+			        </p>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-telephone-fill me-1"></i> +51 987 654 321
+			        </p>
+			        <p class="text-sm text-gray-400">
+			          <i class="bi bi-envelope-fill me-1"></i> info@tecnologia.com
+			        </p>
+			      </div>
+
+			    </div>
+
+			    <hr class="my-8 border-gray-700">
+
+			    <p class="text-center text-gray-500 text-sm">
+			      © 2026 TechNova. Todos los derechos reservados.
+			    </p>
+			  </div>
+			</footer>
+
+			<script>
+			function mostrarSeccion(id, btn) {
+
+			  document.getElementById('editar').classList.add('hidden');
+			  document.getElementById('password').classList.add('hidden');
+			  document.getElementById('desactivar').classList.add('hidden');
+			  document.getElementById('historial').classList.add('hidden');
+
+			  document.getElementById(id).classList.remove('hidden');
+
+			  document.querySelectorAll('.menu-btn').forEach(b => {
+			    b.classList.remove('bg-cyan-600/40');
+			  });
+
+			  btn.classList.add('bg-cyan-600/40');
+			}
+			</script>
+
+	</body>
+</html>
+			

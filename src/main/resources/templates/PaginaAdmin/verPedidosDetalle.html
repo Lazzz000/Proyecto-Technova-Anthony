@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Detalle del Pedido</title>
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body class="bg-gray-900 text-white">
+
+<!-- HEADER ADMIN -->
+<div class="fixed top-0 w-full z-50 bg-white shadow-md flex items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-3 text-lg font-semibold text-gray-800">
+        <i class="fa-solid fa-user-shield text-green-500"></i>
+        Panel de Administración
+    </div>
+
+    <div class="flex items-center gap-6 text-gray-700">
+
+        <a th:href="@{/PaginaAdmin/mensajes}" class="relative hover:text-green-600">
+            <i class="fa-solid fa-envelope text-xl"></i>
+
+            <span th:if="${cantidadMensajesNoLeidos > 0}"
+                  th:text="${cantidadMensajesNoLeidos}"
+                  class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1.5 rounded-full">
+            </span>
+        </a>
+
+        <div>
+            Bienvenido:
+            <span class="font-semibold" th:text="${adminNombre}">Admin</span>
+            <div class="text-gray-600 text-sm" id="reloj">00/00/0000 00:00</div>
+        </div>
+
+    </div>
+</div>
+
+<div class="max-w-6xl mx-auto py-24">
+
+    <!-- VOLVER -->
+    <a th:href="@{/admin/pedidos}"
+       class="mb-6 inline-block bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
+        ← Volver
+    </a>
+
+    <div class="bg-gray-800 rounded-xl shadow-lg p-8">
+
+        <!-- HEADER PEDIDO -->
+        <div class="flex justify-between items-center border-b border-gray-600 pb-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">
+                    Pedido #<span th:text="${pedido.idPedido}"></span>
+                </h1>
+
+                <p class="text-gray-400">
+                    Fecha:
+                    <span th:text="${#temporals.format(pedido.fechaPedido,'dd/MM/yyyy HH:mm')}"></span>
+                </p>
+            </div>
+
+            <span class="px-4 py-2 rounded bg-blue-600"
+                  th:text="${pedido.estado}">
+            </span>
+        </div>
+
+		<!-- CLIENTE -->
+		<div class="grid grid-cols-2 gap-6 mb-6">
+
+		    <div>
+		        <h2 class="text-lg font-semibold mb-2 text-green-400">Cliente</h2>
+
+		        <p>
+		            <strong>Nombre:</strong>
+		            <span th:text="${pedido.cliente != null} ? ${pedido.cliente.nombres + ' ' + pedido.cliente.apellidos} : 'Sin cliente'"></span>
+		        </p>
+
+		        <p>
+		            <strong>Teléfono:</strong>
+		            <span th:text="${pedido.cliente?.telefono}"></span>
+		        </p>
+
+		        <p>
+		            <strong>Email:</strong>
+		            <span th:text="${pedido.cliente?.usuario?.correo}"></span>
+		        </p>
+		    </div>
+
+		    <div>
+		        <h2 class="text-lg font-semibold mb-2 text-green-400">Documento</h2>
+
+		        <p>
+		            <span th:text="${pedido.documento?.tipoDocumento.nombre}"></span> -
+		            <span th:text="${pedido.documento?.numeroDocumento}"></span>
+		        </p>
+		    </div>
+
+		</div>
+
+        <!-- ENVIO -->
+        <div class="grid grid-cols-2 gap-6 mb-6">
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-green-400">Dirección envío</h2>
+                <p th:text="${pedido.direccionEnvio}"></p>
+                <p th:text="${pedido.ciudad}"></p>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-green-400">Contacto</h2>
+                <p th:text="${pedido.telefonoContacto}"></p>
+            </div>
+
+        </div>
+
+        <!-- PAGO -->
+        <div class="grid grid-cols-2 gap-6 mb-8">
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-green-400">Método pago</h2>
+                <p th:text="${pedido.metodoPago}"></p>
+            </div>
+
+            <div th:if="${pedido.ultimos4Tarjeta != null}">
+                <h2 class="text-lg font-semibold mb-2 text-green-400">Tarjeta</h2>
+
+                <p>
+                    **** **** ****
+                    <span th:text="${pedido.ultimos4Tarjeta}"></span>
+                </p>
+
+                <p th:text="${pedido.marcaTarjeta}"></p>
+            </div>
+
+        </div>
+
+        <!-- PRODUCTOS -->
+        <h2 class="text-xl font-bold mb-4 text-green-400">Productos</h2>
+
+        <table class="w-full text-sm">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="py-3 px-4 text-left">Imagen</th>
+                    <th class="py-3 px-4 text-left">Producto</th>
+                    <th class="py-3 px-4">Cantidad</th>
+                    <th class="py-3 px-4">Precio</th>
+                    <th class="py-3 px-4">Subtotal</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="d : ${pedido.detalles}" class="border-b border-gray-700">
+
+                    <td class="py-3 px-4">
+                        <img th:src="@{'/img/' + ${d.producto.imagen}}"
+                             class="w-16 h-16 object-cover rounded">
+                    </td>
+
+                    <td class="py-3 px-4" th:text="${d.producto.nombre}"></td>
+
+                    <td class="py-3 px-4 text-center" th:text="${d.cantidad}"></td>
+
+                    <td class="py-3 px-4 text-center">
+                        S/ <span th:text="${d.precioUnitario}"></span>
+                    </td>
+
+                    <td class="py-3 px-4 text-center">
+                        S/ <span th:text="${d.subtotal}"></span>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div class="flex justify-end mt-8">
+            <div class="bg-gray-700 p-6 rounded-lg text-right w-72">
+                <p class="text-xl">
+                    TOTAL:
+                    <span class="font-bold text-green-400">
+                        S/ <span th:text="${pedido.total}"></span>
+                    </span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function actualizarReloj() {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    const hora = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+
+    document.getElementById('reloj').innerText =
+        `${dia}/${mes}/${anio} ${hora}:${minutos}:${segundos}`;
+}
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+</script>
+
+</body>
+</html>

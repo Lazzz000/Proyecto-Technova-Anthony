@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración</title>
+
+    <!-- Fuente Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-poppins">
+
+<!-- Header -->
+<div class="fixed top-0 w-full z-50 bg-white shadow-md flex items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-3 text-lg font-semibold text-gray-800">
+        <i class="fa-solid fa-user-shield text-green-500"></i>
+        Panel de Administración
+    </div>
+	<div class="flex items-center gap-6 text-gray-700">
+
+	    <!-- ICONO MENSAJES -->
+	    <a th:href="@{/PaginaAdmin/mensajes}"
+	       class="relative text-gray-700 hover:text-green-600 transition">
+
+	        <i class="fa-solid fa-envelope text-xl"></i>
+
+	        <!-- Contador -->
+	        <span th:if="${cantidadMensajesNoLeidos > 0}"
+	              th:text="${cantidadMensajesNoLeidos}"
+	              class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1.5 rounded-full">
+	        </span>
+	    </a>
+
+	    <!-- ADMIN INFO -->
+	    <div>
+	        Bienvenido:
+	        <span class="font-semibold"
+	              th:text="${adminNombre}">Admin</span>
+	        <div class="text-gray-600 text-sm"
+	             id="reloj">00/00/0000 00:00</div>
+	    </div>
+
+	</div>
+</div>
+
+<!-- Layout principal -->
+<div class="flex pt-20 min-h-screen">
+
+    <!-- Sidebar -->
+    <div class="w-60 bg-gray-800 text-gray-200 fixed top-20 left-0 h-[calc(100vh-5rem)] overflow-y-auto shadow-lg rounded-r-xl">
+        <nav class="flex flex-col mt-4">
+            <a th:href="@{/PaginaAdmin/PanelAdmin}" class="flex items-center gap-3 px-6 py-3 rounded-lg bg-gray-700 text-white">
+                <i class="fa-solid fa-chart-line text-green-400"></i> Dashboard
+            </a>
+            <a th:href="@{/Cliente/listar}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-users text-green-400"></i> Clientes
+            </a>
+            <a th:href="@{/mantenimientoProductos/lista}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-box text-green-400"></i>Productos
+            </a>
+			<a th:href="@{/admin/pedidos}"
+			   class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+			    <i class="fa-solid fa-shopping-cart text-green-400"></i>
+			    Pedidos
+			</a>
+			<a th:href="@{/PaginaAdmin/mensajes}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+			              <i class="fa-solid fa-envelope text-green-400"></i>  Mensajes
+			          </a>
+			
+					  <!-- DESCUENTOS -->
+					        <a th:href="@{/mantenimientoDescuentos/listaDescuentos}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+					            <i class="fa-solid fa-tags text-green-400"></i> Descuentos
+					        </a>
+
+					        <!-- PROMOCIONES -->
+					        <a th:href="@{/mantenimientoPromociones/listaPromociones}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+					            <i class="fa-solid fa-bullhorn text-green-400"></i> Promociones
+					        </a>
+            <a th:href="@{/logout}" class="flex items-center gap-3 px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+                <i class="fa-solid fa-right-from-bracket text-red-400"></i> Cerrar sesión
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido -->
+    <div class="ml-60 flex-1 p-8">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-2">
+            Bienvenido Administrador <span class="text-green-500" th:text="${adminNombre}">admin@example.com</span>
+        </h2>
+        <p class="text-gray-600 mb-6">Aquí puedes ver el resumen de la actividad del sistema.</p>
+
+        <!-- Cards estadísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
+                <h3 class="text-3xl font-bold mb-2 text-gray-800" th:text="${totalProductos}">0</h3>
+                <p class="text-gray-500 font-medium">Productos Activos</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
+                <h3 class="text-3xl font-bold mb-2 text-gray-800" th:text="${totalClientes}">0</h3>
+                <p class="text-gray-500 font-medium">Clientes Registrados</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
+                <h3 class="text-3xl font-bold mb-2 text-gray-800" th:text="${totalPedidos}">0</h3>
+                <p class="text-gray-500 font-medium">Pedidos Totales</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
+                <h3 class="text-3xl font-bold mb-2 text-gray-800" th:text="${ingresosMes}">0.00</h3>
+                <p class="text-gray-500 font-medium">Ingresos del Mes</p>
+            </div>
+        </div>
+
+		<!-- Últimos Pedidos -->
+		<div class="bg-white p-6 rounded-xl shadow-md mb-8">
+		    <h3 class="text-xl font-semibold text-gray-800 mb-4">Últimos 5 Pedidos</h3>
+		    <div class="overflow-x-auto">
+		        <table class="min-w-full table-auto">
+		            <thead class="bg-gray-200 text-gray-700">
+		                <tr>
+		                    <th class="px-4 py-2">ID</th>
+		                    <th class="px-4 py-2">Cliente</th>
+		                    <th class="px-4 py-2">Nombre Receptor</th>
+		                    <th class="px-4 py-2">Fecha Pedido</th>
+		                    <th class="px-4 py-2">Total</th>
+		                    <th class="px-4 py-2">Estado</th>
+		                </tr>
+		            </thead>
+		            <tbody>
+		                <tr th:each="pedido : ${ultimosPedidos}" class="border-b">
+		                    <td class="px-4 py-2" th:text="${pedido.idPedido}">1</td>
+		                    <td class="px-4 py-2" th:text="${pedido.cliente.nombres + ' ' + pedido.cliente.apellidos}">Cliente</td>
+		                    <td class="px-4 py-2" th:text="${pedido.nombreReceptor}">Receptor</td>
+		                    <td class="px-4 py-2" th:text="${#temporals.format(pedido.fechaPedido,'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
+		                    <td class="px-4 py-2" th:text="${pedido.total}">0.00</td>
+		                    <td class="px-4 py-2" th:text="${pedido.estado}">Pendiente</td>
+		                </tr>
+		            </tbody>
+		        </table>
+		    </div>
+		</div>
+
+		<!-- Últimos Clientes -->
+		<div class="bg-white p-6 rounded-xl shadow-md mb-8 w-full">
+		    <h3 class="text-xl font-semibold text-gray-800 mb-4">
+		        Últimos 5 Clientes registrados en el sistema
+		    </h3>
+
+		    <div class="overflow-x-auto">
+		        <table class="min-w-full border-collapse">
+		            <thead class="bg-gray-100 text-gray-700">
+		                <tr>
+		                    <th class="px-4 py-3 text-left">ID</th>
+		                    <th class="px-4 py-3 text-left">Nombre</th>
+		                    <th class="px-4 py-3 text-left">Género</th>
+		                    <th class="px-4 py-3 text-left">Correo</th>
+		                    <th class="px-4 py-3 text-left">Teléfono</th>
+		                </tr>
+		            </thead>
+		            <tbody>
+		                <tr th:each="cliente : ${ultimosClientes}"
+		                    class="border-b hover:bg-gray-50">
+		                    <td class="px-4 py-3" th:text="${cliente.idCliente}"></td>
+		                    <td class="px-4 py-3"
+		                        th:text="${cliente.nombres + ' ' + cliente.apellidos}"></td>
+		                    <td class="px-4 py-3" th:text="${cliente.genero}"></td>
+		                    <td class="px-4 py-3" th:text="${cliente.usuario.correo}"></td>
+		                    <td class="px-4 py-3" th:text="${cliente.telefono}"></td>
+		                </tr>
+		            </tbody>
+		        </table>
+		    </div>
+		</div>
+
+    </div>
+</div>
+
+</body>
+	<script>
+	function actualizarReloj() {
+	    const ahora = new Date();
+	    const dia = String(ahora.getDate()).padStart(2, '0');
+	    const mes = String(ahora.getMonth() + 1).padStart(2, '0'); // Enero = 0
+	    const anio = ahora.getFullYear();
+	    const hora = String(ahora.getHours()).padStart(2, '0');
+	    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+	    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+	    document.getElementById('reloj').innerText = `${dia}/${mes}/${anio} ${hora}:${minutos}:${segundos}`;
+	}
+
+	// Actualiza cada segundo
+	setInterval(actualizarReloj, 1000);
+	actualizarReloj(); 
+	</script>
+
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mensajes - Panel Admin</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-poppins">
+
+<!-- HEADER -->
+<div class="fixed top-0 w-full z-50 bg-white shadow-md flex items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-3 text-lg font-semibold text-gray-800">
+        <i class="fa-solid fa-user-shield text-green-500"></i>
+        Panel de Administración
+    </div>
+
+    <div class="flex items-center gap-6 text-gray-700">
+
+        <!-- ICONO MENSAJES -->
+        <a th:href="@{/PaginaAdmin/mensajes}"
+           class="relative text-gray-700 hover:text-green-600 transition">
+
+            <i class="fa-solid fa-envelope text-xl"></i>
+
+            <span th:if="${cantidadMensajesNoLeidos > 0}"
+                  th:text="${cantidadMensajesNoLeidos}"
+                  class="absolute -top-2 -right-3 bg-red-600 text-white text-xs px-1.5 rounded-full">
+            </span>
+        </a>
+
+        <!-- ADMIN INFO -->
+        <div>
+            Bienvenido:
+            <span class="font-semibold"
+                  th:text="${adminNombre}">Admin</span>
+            <div class="text-gray-600 text-sm" id="reloj">00/00/0000 00:00</div>
+        </div>
+    </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="flex pt-20 min-h-screen">
+
+	<!-- SIDEBAR -->
+	<div class="w-60 bg-gray-900 text-gray-200 fixed top-20 left-0 h-[calc(100vh-5rem)] overflow-y-auto shadow-lg rounded-r-2xl">
+	    <nav class="flex flex-col mt-6 space-y-2 px-4">
+
+	        <a th:href="@{/PaginaAdmin/PanelAdmin}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-chart-line text-green-400"></i> Dashboard
+	        </a>
+
+	        <a th:href="@{/Cliente/listar}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-users text-green-400"></i> Clientes
+	        </a>
+
+	        <a th:href="@{/mantenimientoProductos/lista}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-box text-green-400"></i> Productos
+	        </a>
+
+	        <a th:href="@{/Pedidos/listar}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-shopping-cart text-green-400"></i> Pedidos
+	        </a>
+
+	        <!-- DESCUENTOS -->
+	        <a th:href="@{/mantenimientoDescuentos/listaDescuentos}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-percent text-green-400"></i> Descuentos
+	        </a>
+
+	        <!-- PROMOCIONES -->
+	        <a th:href="@{/mantenimientoPromociones/listaPromociones}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-bullhorn text-green-400"></i> Promociones
+	        </a>
+
+	        <a th:href="@{/PaginaAdmin/mensajes}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-800 transition">
+	            <i class="fa-solid fa-envelope text-green-400"></i> Mensajes
+	        </a>
+
+	        <a th:href="@{/logout}"
+	           class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600 transition mt-6">
+	            <i class="fa-solid fa-right-from-bracket text-red-400"></i> Cerrar sesión
+	        </a>
+
+	    </nav>
+	</div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="flex-1 ml-60 px-10 py-10">
+
+        <h1 class="text-3xl font-semibold text-gray-800 mb-8">
+            Bandeja de Mensajes
+        </h1>
+
+        <div class="space-y-6">
+
+            <!-- LISTADO -->
+			<div th:each="mensaje : ${mensajes}"
+			     class="bg-white rounded-2xl shadow-md p-6 border-l-4 transition hover:shadow-xl"
+			     th:classappend="${mensaje.leido} ? ' border-gray-300' : ' border-green-500'">
+
+                <div class="flex justify-between items-center mb-3">
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800"
+                            th:text="${mensaje.nombre}">Nombre</h2>
+
+                        <p class="text-sm text-gray-500"
+                           th:text="${mensaje.email}">correo@email.com</p>
+                    </div>
+
+                    <div class="text-sm text-gray-400"
+                         th:text="${#temporals.format(mensaje.fecha, 'dd/MM/yyyy HH:mm')}">
+                        00/00/0000
+                    </div>
+                </div>
+
+                <p class="text-gray-700 mb-4 leading-relaxed"
+                   th:text="${mensaje.mensaje}">
+                    Contenido del mensaje...
+                </p>
+
+                <div class="flex justify-between items-center">
+
+                    <span th:if="${!mensaje.leido}"
+                          class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                        Nuevo
+                    </span>
+
+                    <a th:if="${!mensaje.leido}"
+                       th:href="@{/PaginaAdmin/mensajes/leido/{id}(id=${mensaje.id})}"
+                       class="text-sm text-blue-600 hover:underline">
+                        Marcar como leído
+                    </a>
+                </div>
+            </div>
+
+            <!-- SI NO HAY MENSAJES -->
+            <div th:if="${#lists.isEmpty(mensajes)}"
+                 class="bg-white p-10 rounded-2xl shadow text-center text-gray-500">
+                <i class="fa-solid fa-inbox text-4xl mb-4 text-gray-400"></i>
+                <p>No hay mensajes aún.</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

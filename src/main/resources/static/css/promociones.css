@@ -1,0 +1,109 @@
+/* ===== DIALOG ===== */
+dialog {
+    border: none;
+    border-radius: 10px;
+    padding: 20px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    font-family: Arial, sans-serif;
+}
+
+/* Fondo oscuro */
+dialog::backdrop {
+    background: rgba(0,0,0,.5);
+}
+
+/* ===== TITULOS ===== */
+dialog h3 {
+    margin: 0 0 15px;
+}
+
+/* ===== BUSCADOR ===== */
+.buscador {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.buscador input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.buscador button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* ===== LISTAS ===== */
+.listas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.lista h4 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #444;
+}
+
+.lista ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+
+    overflow-y: auto;
+}
+
+/* ===== ITEMS ===== */
+.lista li {
+    padding: 8px 10px;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+}
+
+.lista li:hover {
+    background: #f3f4f6;
+}
+
+.seleccionados li {
+    background: #e0e7ff;
+}
+
+.remove {
+    color: #dc2626;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===== ACCIONES ===== */
+.acciones {
+    text-align: right;
+}
+
+.acciones button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+.confirmar {
+    background: #16a34a;
+    color: #fff;
+}
+input[type="date"]{
+    cursor:pointer;
+}

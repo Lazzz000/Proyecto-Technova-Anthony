@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión - TechNova</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" th:href="@{/img/logo.jpg}" type="image/png">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .is-invalid { border-color: #dc3545 !important; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-cover bg-center flex items-center justify-center"
+      style="background-image: url('/img/fondotecno.png');">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+
+    <!-- Card -->
+    <div class="relative bg-white bg-opacity-95 rounded-3xl shadow-xl p-10 w-full max-w-md z-10">
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <img th:src="@{/img/logo.jpg}"
+                 alt="Logo TechNova"
+                 class="h-20 w-20 rounded-full shadow-md">
+        </div>
+
+        <!-- Título -->
+        <h2 class="text-3xl font-bold text-center text-gray-800 flex items-center justify-center gap-2 mb-6">
+            <i class="bi bi-cpu-fill text-blue-600"></i> TechNova
+        </h2>
+
+        <p class="text-center text-gray-500 mb-4">
+            Accede a tu plataforma tecnológica
+        </p>
+
+        <!-- Mensajes backend -->
+        <div th:if="${param.error}"
+             class="bg-red-100 text-red-700 px-4 py-2 rounded-md mb-4 text-center">
+            ❌ Credenciales incorrectas. Verifica tus datos.
+        </div>
+
+        <div th:if="${param.logout}"
+             class="bg-green-100 text-green-700 px-4 py-2 rounded-md mb-4 text-center">
+            ✅ Sesión cerrada correctamente.
+        </div>
+
+        <!-- Formulario -->
+        <form th:action="@{/procesarLogin}" method="post" class="space-y-4">
+
+            <div class="relative">
+                <i class="bi bi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="email" name="correo" placeholder="Correo electrónico" required
+                       class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="relative">
+                <i class="bi bi-lock-fill absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="password" id="password" name="clave" placeholder="Contraseña" required
+                       class="w-full pl-10 pr-10 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i id="togglePassword"
+                   class="bi bi-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"></i>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold hover:bg-blue-700 transition">
+                Ingresar
+            </button>
+        </form>
+		<p class="text-center text-gray-500 mt-4">
+		           ¿No tienes cuenta? <a th:href="@{/register}" class="text-green-500 hover:underline">Regístrate</a>
+		       </p>
+			   
+        <hr class="my-6 border-gray-300">
+
+        <a th:href="@{/PaginaWeb/index}"
+           class="w-full block text-center bg-gray-200 text-gray-800 py-2 rounded-xl font-semibold hover:bg-gray-300 transition">
+            Continuar como visitante
+        </a>
+    </div>
+
+    <script>
+        const password = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        togglePassword.addEventListener('click', () => {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            togglePassword.classList.toggle('bi-eye');
+            togglePassword.classList.toggle('bi-eye-slash');
+        });
+    </script>
+
+</body>
+</html>

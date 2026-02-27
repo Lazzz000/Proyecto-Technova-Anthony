@@ -1,0 +1,34 @@
+# --- Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- IDE (Eclipse / STS) ---
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+.sts4-cache/
+
+# --- Binarios y Librerías (Lombok) ---
+*.jar
+*.war
+*.ear
+# Si necesitas subir un jar específico, usa !nombre.jar, pero lombok.jar no suele subirse.
+
+# --- Archivos de Sistema / Logs ---
+.DS_Store
+*.log
+tmp/
+
+# --- Recursos locales ---
+# He visto que tienes una carpeta de imagenesTecnologia. 
+# Si son imágenes estáticas del proyecto, quítala de aquí. 
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iml
+out/
+
+# --- VS Code ---
+.vscode/

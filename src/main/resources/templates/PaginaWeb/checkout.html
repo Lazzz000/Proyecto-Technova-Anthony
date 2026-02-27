@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+
+>
+
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}" />
+  <title>Checkout - Tienda de Tecnología</title>
+
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/PaginaWeb.css}">
+  <link rel="icon" th:href="@{/img/logo.jpg}" type="image/jpg">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .step { transition: all 0.3s ease; }
+  </style>
+</head>
+
+<body class="min-h-screen text-white bg-gradient-to-br from-[#0a1f44] via-[#0f2a5f] to-[#1b1f3b]">
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 w-full bg-[#020617]/70 backdrop-blur-xl border-b border-cyan-400/20 text-white shadow z-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex justify-between items-center h-16">
+
+        <!-- Logo -->
+        <a th:href="@{/PaginaWeb/index}" class="text-xl font-bold text-cyan-400 tracking-wider">
+          💻 TechNova
+        </a>
+
+        <!-- Botón móvil -->
+        <button id="menuBtn" class="md:hidden text-2xl">☰</button>
+
+        <!-- Links -->
+        <ul id="menu" class="hidden md:flex gap-6 items-center">
+          <li><a th:href="@{/PaginaWeb/index}" class="hover:text-cyan-400 transition">Inicio</a></li>
+          <li><a th:href="@{/catalogo}" class="hover:text-cyan-400 transition">Productos</a></li>
+          <li class="relative group">
+            <span class="cursor-pointer hover:text-cyan-400 transition">Categorías</span>
+            <ul class="absolute hidden group-hover:block bg-gray-800 mt-2 rounded shadow w-48">
+              <li th:each="c : ${categorias}">
+               <a th:href="@{'/catalogo?categoria=' + ${c.idCategoria}}"
+                   th:text="${c.nombreCategoria}"
+                   class="block px-4 py-2 hover:bg-red-500"></a>
+              </li>
+            </ul>
+          </li>
+          <li><a th:href="@{/nosotros}" class="hover:text-cyan-400 transition">Nosotros</a></li>
+          <li><a th:href="@{/contacto}" class="hover:text-cyan-400 transition">Contacto</a></li>
+
+          <li sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}" class="bg-red-600 px-3 py-1 rounded">Login</a>
+          </li>
+          <li sec:authorize="!isAuthenticated()">
+            <a th:href="@{/register}" class="border px-3 py-1 rounded">Registro</a>
+          </li>
+
+          <li sec:authorize="isAuthenticated()" class="flex items-center gap-4">
+            <a th:href="@{/carrito}" class="relative hover:text-red-500 transition" title="Ver carrito">
+              🛒
+              <span th:if="${carritoCount > 0}" th:text="${carritoCount}"
+                    class="absolute -top-2 -right-3 bg-red-600 text-xs px-1.5 rounded-full"></span>
+            </a>
+            <div class="relative group">
+              <span class="text-sm cursor-pointer hover:text-cyan-400 transition">
+                Hola, <strong th:text="${nombreCom}"></strong> ⌄
+              </span>
+              <ul class="absolute right-0 mt-2 w-40 bg-[#020617] border border-cyan-400/20 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out">
+                <li>
+                  <a th:href="@{/perfil}" class="block px-4 py-2 hover:bg-cyan-600 hover:text-white rounded-lg">👤 Mi Perfil</a>
+                </li>
+              </ul>
+            </div>
+            <a th:href="@{/logout}" class="border px-3 py-1 rounded hover:bg-red-600 transition">Salir</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <main class="max-w-7xl mx-auto px-6 py-32">
+      <h1 class="text-4xl font-bold mb-8 text-center text-cyan-400">Checkout</h1>
+
+      <div class="bg-[#020617]/80 p-6 rounded-lg shadow space-y-8">
+
+		    <!-- STEP 1: Carrito -->
+		    <section id="step1" class="step" th:fragment="step1-table">
+		      <h2 class="text-2xl font-semibold mb-4">Resumen de tu carrito</h2>
+
+		      <div th:if="${checkoutDTO.items.isEmpty()}">
+		        <p class="text-red-500">Tu carrito está vacío</p>
+		      </div>
+
+		      <div th:if="${!checkoutDTO.items.isEmpty()}" class="overflow-x-auto">
+		        <table class="w-full text-left text-white">
+		          <thead class="border-b border-cyan-400/50">
+		            <tr>
+		              <th class="py-2">Imagen</th>
+		              <th class="py-2">Producto</th>
+		              <th class="py-2">Cantidad</th>
+		              <th class="py-2">Precio</th>
+		              <th class="py-2">Subtotal</th>
+                        <th class="py-2 text-center">Eliminar</th>
+		            </tr>
+		          </thead>
+		          <tbody>
+		            <tr th:each="item : ${checkoutDTO.items}" class="border-b border-cyan-400/20">
+		              <td class="py-2">
+		                <div class="w-16 h-16 overflow-hidden rounded">
+		                  <img th:src="@{'/img/' + ${item.producto.imagen}}"
+		                       th:alt="${item.producto.nombre}"
+		                       class="w-full h-full object-cover">
+		                </div>
+		              </td>
+		              <td class="py-2" th:text="${item.producto.nombre}"></td>
+		              <td class="py-2">
+		                <input type="number" min="1" th:value="${item.cantidad}" 
+		                       class="w-20 text-black px-2 py-1 rounded"
+		                       th:data-precio="${item.producto.precio}" 
+		                       oninput="updateSubtotal(this)">
+		              </td>
+		              <td class="py-2">S/ <span th:text="${item.producto.precio}" class="precio"></span></td>
+		              <td class="py-2">S/ <span th:text="${item.subtotal}" class="subtotal"></span></td>
+                        <td class="py-2 text-center">
+                            <button type="button"
+                                    th:onclick="'eliminarProducto(' + ${item.producto.idProducto} + ')'"
+                                    class="text-red-500 hover:text-red-700 transition text-xl">
+                                🗑
+                            </button>
+                        </td>
+		            </tr>
+		          </tbody>
+		        </table>
+
+		        <p class="mt-4 text-right text-lg font-semibold">
+		          Total: S/ <span id="total" th:text="${checkoutDTO.total}"></span>
+		        </p>
+
+		        <div class="mt-4 flex gap-4">
+		          <button type="button" onclick="showStep(2)" 
+		                  class="bg-cyan-500 hover:bg-cyan-600 px-6 py-2 rounded font-semibold focus:outline-none">
+		            Continuar
+		          </button>
+
+		          <a th:href="@{/catalogo}" 
+		             class="bg-gray-500 hover:bg-gray-600 px-6 py-2 rounded font-semibold focus:outline-none">
+		            Seguir comprando
+		          </a>
+		        </div>
+		      </div>
+		    </section>
+
+		    <!-- STEP 2 -->
+		    <section id="step2" class="hidden step">
+		      <h2 class="text-2xl font-semibold mb-4">Datos de envío y método de pago</h2>
+		      <form id="step2Form" th:object="${checkoutDTO}">
+		        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+		          <div>
+		            <label class="block mb-1">Nombre del receptor</label>
+		            <input type="text" th:field="*{nombreReceptor}" 
+		                   class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorNombreReceptor">
+                          El nombre del receptor es obligatorio.
+                      </div>
+		          </div>
+
+				  <div>
+				      <label class="block mb-1">Tipo de Documento</label>
+				      <select th:field="*{idTipoDocumento}"
+				              class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white border border-cyan-400/30 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+				          
+				          <option value="" class="bg-[#1b1f3b] text-white">Seleccione...</option>
+				          
+				          <option th:each="doc : ${tiposDocumento}"
+				                  th:value="${doc.idTipoDocumento}"
+				                  th:text="${doc.nombre + ' - ' + doc.sigla}"
+				                  class="bg-[#1b1f3b] text-white">
+				          </option>
+				      </select>
+                      <div  class="text-red-500 text-sm mt-1 hidden" id="errorTipoDoc">
+                          Elige un tipo documento
+                      </div>
+				  </div>
+
+		          <div>
+		            <label class="block mb-1">Número de Documento</label>
+		            <input type="text" th:field="*{numeroDocumento}" 
+		                   class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white" 
+		                   placeholder="Ingresar número de documento"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorNumeroDocumento">
+
+                      </div>
+		          </div>
+
+		          <div>
+		            <label class="block mb-1">Nombre del Titular</label>
+		            <input type="text" th:field="*{nombreTitular}" 
+		                   class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white" 
+		                   placeholder="Ingresar nombre del titular"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorNombreTitular">
+
+                      </div>
+		          </div>
+
+		          <div>
+		            <label class="block mb-1">Dirección de envío</label>
+		            <input type="text" th:field="*{direccionEnvio}" 
+		                   class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorDireccionEnvio">
+
+                      </div>
+		          </div>
+
+		          <div>
+		            <label class="block mb-1">Ciudad</label>
+		            <input type="text" th:field="*{ciudad}" class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorCiudad">
+
+                      </div>
+		          </div>
+
+		          <div>
+		            <label class="block mb-1">Teléfono</label>
+		            <input type="number" th:field="*{telefonoContacto}" maxlength="9" class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white"/>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorTelefonoContacto">
+
+                      </div>
+		          </div>
+
+		          <div>
+		            <label class="block mb-1">Método de pago</label>
+		            <select id="metodoPago" th:field="*{metodoPago}" class="w-full px-3 py-2 rounded bg-[#1b1f3b]/80 text-white" onchange="mostrarModalPago()">
+		              <option value="">-- Elegir método --</option>
+		              <option th:each="m : ${T(com.demo.modelo.enums.MetodoPago).values()}" th:value="${m}" th:text="${m}"></option>
+		            </select>
+                      <div class="text-red-500 text-sm mt-1 hidden" id="errorMetodoPago">
+                            Debe elegir un metodo de pago
+                      </div>
+		          </div>
+
+		        </div>
+
+		        <div class="flex justify-between mt-6">
+		          <button type="button" onclick="showStep(1)" class="bg-gray-500 hover:bg-gray-600 px-6 py-2 rounded focus:outline-none">Atrás</button>
+		          <button type="button" onclick="guardarStep2()" class="bg-cyan-500 hover:bg-cyan-600 px-6 py-2 rounded focus:outline-none">Continuar</button>
+		        </div>
+		      </form>
+		    </section>
+
+
+		<!-- STEP 3: Confirmación -->
+		<section id="step3" class="hidden step">
+		  <h2 class="text-2xl font-semibold mb-4">Confirmar compra</h2>
+		  <p class="mb-4">Revisa tu pedido antes de confirmar:</p>
+
+		  <!-- Resumen de carrito -->
+		  <div th:if="${!checkoutDTO.items.isEmpty()}" class="overflow-x-auto mb-4">
+		    <table class="w-full text-left text-white">
+		      <thead class="border-b border-cyan-400/50">
+		        <tr>
+		          <th class="py-2">Producto</th>
+		          <th class="py-2">Cantidad</th>
+		          <th class="py-2">Subtotal</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+				<tr th:each="item : ${checkoutDTO.items}" class="border-b border-cyan-400/20">
+				  <td class="py-2">
+				    <div class="flex items-center gap-3">
+				      
+				      <div class="w-16 h-16 overflow-hidden rounded">
+				        <img th:src="@{'/img/' + ${item.producto.imagen}}"
+				             th:alt="${item.producto.nombre}"
+				             class="w-full h-full object-cover">
+				      </div>
+
+				      <span th:text="${item.producto.nombre}"></span>
+				      
+				    </div>
+				  </td>
+
+				  <td class="py-2" th:text="${item.cantidad}"></td>
+
+				  <td class="py-2">
+				    S/ <span th:text="${item.subtotal}"></span>
+				  </td>
+				</tr>
+		      </tbody>
+		    </table>
+		  </div>
+
+		  <!-- Datos de envío -->
+		  <div class="mb-4">
+		    <p><strong>Nombre del receptor:</strong> <span id="step3NombreReceptor">----</span></p>
+		    <p>
+		      <strong>Documento:</strong> 
+		      <span id="step3Documento">----</span>
+		    </p>
+		    <p>
+		      <strong>Dirección:</strong> 
+		      <span id="step3Direccion">----</span>
+		    </p>
+		    <p><strong>Teléfono:</strong> <span id="step3Telefono">----</span></p>
+		    <p><strong>Método de pago:</strong> <span id="step3MetodoPago">----</span></p>
+		  </div>
+
+		  <!-- Total -->
+		  <p class="mt-4 text-right text-lg font-semibold">
+		    Total: S/ <span id="step3Total" th:text="${checkoutDTO.total}">0.00</span>
+		  </p>
+
+		  <!-- Formulario para confirmar -->
+		  <form id="step3Form" th:action="@{/checkout/confirmar}" th:object="${checkoutDTO}" method="post">
+		    <!-- Aquí agregamos los hidden inputs para enviar los datos al backend -->
+		    <input type="hidden" th:field="*{nombreReceptor}" />
+			<input type="hidden" th:field="*{idTipoDocumento}" />
+		    <input type="hidden" th:field="*{numeroDocumento}" />
+		    <input type="hidden" th:field="*{nombreTitular}" />
+		    <input type="hidden" th:field="*{direccionEnvio}" />
+		    <input type="hidden" th:field="*{ciudad}" />
+		    <input type="hidden" th:field="*{telefonoContacto}" />
+		    <input type="hidden" th:field="*{metodoPago}" />
+			
+			<p class="mt-2">
+			  <strong>Tarjeta:</strong> 
+			  <span id="tarjetaPreview" class="text-gray-300">
+			    **** **** **** <span id="ultimos4">----</span>
+			  </span>
+			</p>
+			
+			<input type="hidden" name="ultimos4Tarjeta" id="ultimos4Hidden">
+
+		    <button type="submit" id="confirmarCompraBtn" class="mt-4 bg-green-500 hover:bg-green-600 px-6 py-2 rounded font-semibold">
+		      Confirmar compra
+		    </button>
+		  </form>
+		</section>
+
+      </div>
+  </main>
+
+  
+  <!-- Modal Tarjeta -->
+  <div id="modalTarjeta" 
+       class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+
+    <div class="bg-[#1b1f3b] p-6 rounded-2xl w-96 relative shadow-2xl border border-cyan-500/30">
+
+      <!-- Botón cerrar -->
+      <button onclick="cerrarModal('modalTarjeta')" 
+              class="absolute top-3 right-3 text-gray-300 hover:text-white text-lg">
+        ✖
+      </button>
+
+      <h3 class="text-xl font-semibold mb-5 text-cyan-400 text-center">
+        Pago con Tarjeta
+      </h3>
+
+      <div class="space-y-4">
+
+        <!-- Número de tarjeta -->
+        <input 
+          id="numeroTarjeta"
+          type="text" 
+          maxlength="16"
+          pattern="\d{16}"
+          inputmode="numeric"
+          placeholder="Número de tarjeta"
+          class="w-full px-3 py-2 rounded-lg text-black focus:ring-2 focus:ring-cyan-500 outline-none"
+        />
+          <div class="text-red-500 text-sm hidden" style="margin-top:0 !important" id="errorNumTarj">
+
+          </div>
+
+        <!-- Nombre titular -->
+        <input 
+          id="nombreTitularT"
+          type="text" 
+          placeholder="Nombre del titular"
+          class="w-full px-3 py-2 rounded-lg text-black focus:ring-2 focus:ring-cyan-500 outline-none"
+        />
+          <div class="text-red-500 text-sm hidden" style="margin-top:0 !important" id="errorNomTitu">
+
+          </div>
+
+        <!-- Fecha + CVV -->
+        <div class="flex gap-3">
+          <input 
+            id="fechaExp"
+            type="text" 
+            placeholder="MM / YY"
+            maxlength="7"
+            pattern="\d{2} / \d{2}"
+            inputmode="numeric"
+            class="w-1/2 px-3 py-2 rounded-lg text-black focus:ring-2 focus:ring-cyan-500 outline-none"
+          />
+
+
+          <input 
+            id="cvv"
+            type="password"
+            maxlength="4"
+            inputmode="numeric"
+            placeholder="CVV"
+            class="w-1/2 px-3 py-2 rounded-lg text-black focus:ring-2 focus:ring-cyan-500 outline-none"
+          />
+        </div>
+          <div class="flex gap-3">
+              <div class="text-red-500 text-sm w-1/2 px-3 hidden" style="margin-top:0 !important" id="errorFech">
+
+              </div>
+              <div class="text-red-500 text-sm w-1/2 px-3 hidden" style="margin-top:0 !important" id="errorCvv">
+
+              </div>
+          </div>
+
+
+        <!-- Botón guardar -->
+        <button 
+          onclick="guardarTarjeta()"
+          class="bg-gradient-to-r from-cyan-500 to-blue-500 
+                 hover:from-cyan-600 hover:to-blue-600 
+                 transition-all duration-300
+                 w-full py-2 rounded-xl font-semibold shadow-lg">
+          Guardar tarjeta
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ContraEntrega -->
+  <div id="modalContraEntrega" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-[#1b1f3b] p-6 rounded-lg w-80 relative">
+      <button onclick="cerrarModal('modalContraEntrega')" class="absolute top-2 right-2 text-white">✖</button>
+      <h3 class="text-xl font-semibold mb-4 text-cyan-400">Contra Entrega</h3>
+      <p>Pagarás cuando recibas tu pedido en la dirección indicada.</p>
+      <button class="bg-green-500 hover:bg-green-600 w-full py-2 rounded mt-3 font-semibold" onclick="cerrarModal('modalContraEntrega')">Aceptar</button>
+    </div>
+  </div>
+  
+  <div id="loginWarningModal"
+       class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden" >
+
+      <div class="bg-gray-900 p-6 rounded-xl w-96 text-center">
+          <div class="text-yellow-400 text-5xl mb-4">⚠️</div>
+          <h2 class="text-xl font-bold mb-2">Debes iniciar sesión</h2>
+          <p class="text-gray-300 mb-4">
+              Para poder realizar compras necesitas registrarte o iniciar sesión.
+          </p>
+
+          <div class="flex justify-center gap-4">
+              <a href="/login"
+                 class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700">
+                 Iniciar Sesión
+              </a>
+
+              <a href="/registro"
+                 class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+                 Registrarse
+              </a>
+          </div>
+      </div>
+  </div>
+  <!-- Modal Eliminar Producto -->
+  <div id="modalEliminar"
+       class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+
+      <div class="bg-[#1b1f3b] p-6 rounded-2xl w-96 text-center border border-red-500/30 shadow-xl">
+
+          <h2 class="text-xl font-bold text-red-400 mb-4">
+              ¿Eliminar producto?
+          </h2>
+
+          <p class="text-gray-300 mb-6">
+              ¿Seguro que quieres eliminar este producto del carrito?
+          </p>
+
+          <div class="flex justify-center gap-4">
+              <button onclick="cerrarModalEliminar()"
+                      class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded">
+                  No
+              </button>
+
+              <button onclick="confirmarEliminar()"
+                      class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold">
+                  Confirmar
+              </button>
+          </div>
+
+      </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-[#020617]/80 backdrop-blur text-gray-300 border-t border-cyan-400/20">
+    <div class="container mx-auto px-6 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 text-center md:text-left">
+        <div>
+          <h2 class="text-2xl font-bold text-red-500 mb-3">💻 TechNova</h2>
+          <p class="text-gray-400 text-sm">La mejor experiencia de tecnologia, con promociones, descuentos y preventas exclusivas para nuestros clientes.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">Enlaces</h3>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a th:href="@{/PaginaWeb/index}" class="hover:text-red-500">Inicio</a></li>
+              <li><a th:href="@{/catalogo}" class="hover:text-cyan-400 transition">Productos</a></li>
+            <li><a th:href="@{/nosotros}" class="hover:text-red-500">Nosotros</a></li>
+            <li><a th:href="@{/contacto}" class="hover:text-red-500">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">Contacto</h3>
+          <p class="text-sm text-gray-400">Av. Wilson 123, Lima, Perú</p>
+          <p class="text-sm text-gray-400">+51 987 654 321</p>
+          <p class="text-sm text-gray-400">info@tecnologia.com</p>
+        </div>
+      </div>
+      <hr class="my-8 border-gray-700">
+      <p class="text-center text-gray-500 text-sm">© 2026 TechNova. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script  th:inline="javascript">
+
+    const numTarj = document.getElementById("numeroTarjeta")
+    const nomTitTarj = document.getElementById("nombreTitularT")
+    const fechaExp = document.getElementById("fechaExp")
+    const cvvInp= document.getElementById("cvv")
+    let tarjetValid = false
+
+   function showStep(step) {
+       const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+       if (!isAuthenticated) {
+           document.getElementById("loginWarningModal").classList.remove("hidden");
+           return
+       }
+
+       document.getElementById('step1').classList.add('hidden');
+       document.getElementById('step2').classList.add('hidden');
+       document.getElementById('step3').classList.add('hidden');
+       document.getElementById('step' + step).classList.remove('hidden');
+
+       // Actualizamos Step 3 si vamos a él
+       if(step === 3) {
+           actualizarStep3();
+       }
+   }
+   function validarFormStep2(){
+     const regex = /^[A-Z0-9]{6,12}$/;
+     const nombreInput = document.getElementById("nombreReceptor")
+     const select = document.getElementById("idTipoDocumento")
+     const numDoc = document.getElementById("numeroDocumento")
+     const nomTit = document.getElementById("nombreTitular")
+     const dirEnv = document.getElementById("direccionEnvio")
+     const ciu = document.getElementById("ciudad")
+     const tel = document.getElementById("telefonoContacto")
+     const metPag = document.getElementById("metodoPago")
+
+     const errorNombre = document.getElementById("errorNombreReceptor")
+     const errorTipDoc = document.getElementById("errorTipoDoc")
+     const errorNumDoc = document.getElementById("errorNumeroDocumento")
+     const errorNomTit = document.getElementById("errorNombreTitular")
+     const errorDirEnv = document.getElementById("errorDireccionEnvio")
+     const errorCiu = document.getElementById("errorCiudad")
+     const errorTel = document.getElementById("errorTelefonoContacto")
+     const errorMetPag = document.getElementById("errorMetodoPago")
+
+     errorNombre.className="text-red-500 text-sm mt-1 hidden"
+     errorTipDoc.className="text-red-500 text-sm mt-1 hidden"
+     errorNumDoc.className="text-red-500 text-sm mt-1 hidden"
+     errorNomTit.className="text-red-500 text-sm mt-1 hidden"
+     errorDirEnv.className="text-red-500 text-sm mt-1 hidden"
+     errorCiu.className="text-red-500 text-sm mt-1 hidden"
+     errorTel.className="text-red-500 text-sm mt-1 hidden"
+     errorMetPag.className="text-red-500 text-sm mt-1 hidden"
+
+     let isValid = true
+
+     if (nombreInput.value.trim() === "") {
+         errorNombre.classList.remove("hidden")
+         isValid = false
+     }
+
+     if (select.value === "") {
+         errorTipDoc.classList.remove("hidden")
+         isValid = false
+     }
+     if(numDoc.value.trim() == ""){
+         errorNumDoc.classList.remove("hidden");
+         errorNumDoc.textContent = "El numero de documento no puede estar vacio"
+         isValid = false
+     }else if(select.value ==1 && (numDoc.value.length!=8 || !Number.isInteger(Number(numDoc.value)))){
+         errorNumDoc.classList.remove("hidden");
+         errorNumDoc.textContent = "El numero de documento debe tener 8 digitos numericos"
+         isValid = false
+     }else if(select.value ==2 && numDoc.value.length != 9){
+         errorNumDoc.classList.remove("hidden");
+         errorNumDoc.textContent = "El carnet de extranjeria debe tener 9 digitos numericos"
+         isValid = false
+     }else if(select.value ==3 && !regex.test(numDoc.value)){
+         errorNumDoc.classList.remove("hidden");
+         errorNumDoc.textContent = "Pasaporte inválido. Debe tener entre 6 y 12 caracteres (solo letras y números)."
+         isValid = false
+     }
+
+     if(nomTit.value.trim() ==""){
+         errorNomTit.classList.remove("hidden");
+         errorNomTit.textContent = "El nombre del titular no debe estar vacio"
+         isValid = false
+     }
+
+     if(dirEnv.value.trim() ==""){
+         errorDirEnv.classList.remove("hidden");
+         errorDirEnv.textContent = "La direccion no puede estar vacia"
+         isValid = false
+     }
+     if(ciu.value.trim() ==""){
+         errorCiu.classList.remove("hidden");
+         errorCiu.textContent = "La ciudad no puede estar vacia"
+         isValid = false
+     }
+     if(tel.value.trim() ==""){
+         errorTel.classList.remove("hidden");
+         errorTel.textContent = "El telefono no puede estar vacio"
+         isValid = false
+     }else if(tel.value.length!=9){
+         errorTel.classList.remove("hidden");
+         errorTel.textContent = "El telefono debe tener 9 digitos"
+         isValid = false
+     }
+
+     if (metPag.value === "") {
+         errorMetPag.classList.remove("hidden");
+         isValid = false
+     }else if(!tarjetValid){
+        errorMetPag.classList.remove("hidden");
+        errorMetPag.textContent = "Complete bien los campos para la tarjeta"
+        isValid = false
+     }
+
+
+
+     return isValid
+   }
+
+   function guardarStep2() {
+       let valido = validarFormStep2()
+
+       if(!valido) return
+
+       const form = document.getElementById('step2Form');
+
+       const formData = new FormData(form);
+       const data = {};
+       formData.forEach((value, key) => { data[key] = value; });
+
+       const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+       const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+       let headers = { 'Content-Type': 'application/json' };
+       if(csrfTokenMeta && csrfHeaderMeta){
+           headers[csrfHeaderMeta.getAttribute('content')] = csrfTokenMeta.getAttribute('content');
+       }
+
+       fetch('/checkout/step2', {
+           method: 'POST',
+           headers: headers,
+           body: JSON.stringify(data)
+       })
+       .then(response => {
+           if (!response.ok) {
+               return response.text().then(text => { throw new Error(text || 'Error en servidor'); });
+           }
+           return response.text();
+       })
+       .then(text => {
+           console.log("Step2 guardado:", text);
+           showStep(3);
+       })
+       .catch(error => {
+           console.error("Error en fetch /checkout/step2:", error);
+           alert("Ocurrió un error al guardar los datos: " + error.message);
+       });
+   }
+
+   function actualizarStep3() {
+       const form = document.getElementById('step2Form');
+       const items = document.querySelectorAll('#step1 tbody tr');
+
+       let total = 0;
+       items.forEach(tr => {
+           const cantidad = parseInt(tr.querySelector('input[type="number"]').value);
+           const precio = parseFloat(tr.querySelector('.precio').textContent);
+           const subtotal = cantidad * precio;
+           total += subtotal;
+
+           const subtotalElem = tr.querySelector('.subtotal');
+           if(subtotalElem) subtotalElem.textContent = subtotal.toFixed(2);
+       });
+
+       // Datos Step 2 → Step 3
+       const nombreReceptor = form?.nombreReceptor?.value || "----";
+       const idTipoDocumento = form?.idTipoDocumento?.value || "----";
+       const numeroDocumento = form?.numeroDocumento?.value || "----";
+       const direccionEnvio = form?.direccionEnvio?.value || "----";
+       const ciudad = form?.ciudad?.value || "----";
+       const telefonoContacto = form?.telefonoContacto?.value || "----";
+       const metodoPago = form?.metodoPago?.value || "----";
+       const ultimos4 = document.getElementById("ultimos4Hidden")?.value || "----";
+
+       // Actualizar Step3
+       document.getElementById("step3NombreReceptor").textContent = nombreReceptor;
+       document.getElementById("step3Documento").textContent = idTipoDocumento + " - " + numeroDocumento;
+       document.getElementById("step3Direccion").textContent = direccionEnvio + ", " + ciudad;
+       document.getElementById("step3Telefono").textContent = telefonoContacto;
+       document.getElementById("step3MetodoPago").textContent = metodoPago;
+       document.getElementById("ultimos4").textContent = ultimos4;
+
+       const totalElem = document.getElementById("step3Total");
+       if(totalElem) totalElem.textContent = total.toFixed(2);
+       const totalStep1 = document.getElementById("total");
+       if(totalStep1) totalStep1.textContent = total.toFixed(2);
+   }
+
+   function updateSubtotal(input) {
+       actualizarStep3();
+   }
+
+   function mostrarModalPago() {
+       const metodo = document.getElementById('metodoPago')?.value;
+       if (metodo === 'TARJETA') {
+           document.getElementById('modalTarjeta')?.classList.remove('hidden');
+       } else if (metodo === 'CONTRA_ENTREGA') {
+           document.getElementById('modalContraEntrega')?.classList.remove('hidden');
+       }
+   }
+   function validarTarjeta(){
+       const errorNumTarj = document.getElementById("errorNumTarj")
+       const errorNomTitu = document.getElementById("errorNomTitu")
+       const errorFech = document.getElementById("errorFech")
+       const errorCvv = document.getElementById("errorCvv")
+
+       errorNumTarj.className="text-red-500 text-sm mt-1 hidden"
+       errorNomTitu.className="text-red-500 text-sm mt-1 hidden"
+       errorFech.className="text-red-500 text-sm mt-1 hidden"
+       errorCvv.className="text-red-500 text-sm mt-1 hidden"
+       tarjetValid = false
+
+       let mes = fechaExp.value.trim().substring(0, 2)
+       console.log(mes)
+       if ( numTarj.value.length < 16 ||numTarj.value.trim()=="") {
+         errorNumTarj.textContent = "El numero de tarjeta es erroneo"
+         errorNumTarj.classList.remove("hidden");
+
+       }else if(nomTitTarj.value.trim() ==""){
+         errorNomTitu.textContent = "El numero de tarjeta es erroneo"
+         errorNomTitu.classList.remove("hidden");
+
+       }else if(fechaExp.value.trim() ==""){
+         errorFech.textContent = "La fecha no puede estar vacia"
+         errorFech.classList.remove("hidden");
+
+       }else if(parseInt(mes, 10)>12){
+         errorFech.textContent = "El mes debe ser menor o igual a 12"
+         errorFech.classList.remove("hidden");
+
+       }else if(cvvInp.value.trim()==""||cvvInp.value.length<3){
+         errorCvv.textContent = "El cvv debe tener 3 o 4 digitos"
+         errorCvv.classList.remove("hidden");
+
+       }else{
+        tarjetValid = true
+       }
+   }
+
+   function cerrarModal(id) {
+       validarTarjeta()
+       if(!tarjetValid){
+        const miSelect = document.getElementById('metodoPago').selectedIndex = 0
+       }
+       document.getElementById(id)?.classList.add('hidden');
+   }
+
+   function guardarTarjeta() {
+        validarTarjeta()
+        if(!tarjetValid) return
+
+
+       const ultimos4 = numTarj.value.slice(-4);
+       console.log(ultimos4)
+       document.getElementById("ultimos4").textContent = ultimos4;
+       document.getElementById("ultimos4Hidden").value = ultimos4;
+
+       const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+       const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+       let headers = { 'Content-Type': 'application/json' };
+       if(csrfTokenMeta && csrfHeaderMeta){
+           headers[csrfHeaderMeta.getAttribute('content')] = csrfTokenMeta.getAttribute('content');
+       }
+
+       fetch('/checkout/guardar-tarjeta', {
+           method: 'POST',
+           headers: {
+              'Content-Type': 'text/plain'
+           },
+           body: ultimos4
+       })
+       .then(response => {
+           if(!response.ok) throw new Error("Error al guardar tarjeta");
+       })
+       .catch(error => console.error("Error tarjeta:", error));
+
+       cerrarModal('modalTarjeta');
+   }
+
+
+
+   // === NUEVO: Confirmar compra con AJAX, animación y redirección ===
+   document.addEventListener("DOMContentLoaded", function() {
+       actualizarStep3();
+
+       const step3Form = document.getElementById("step3Form");
+       const confirmarBtn = document.getElementById("confirmarCompraBtn");
+
+       if(confirmarBtn && step3Form){
+           confirmarBtn.addEventListener("click", function(e){
+               e.preventDefault();
+               confirmarCompraAjax();
+           });
+       }
+
+       function confirmarCompraAjax() {
+           const formData = new FormData(step3Form);
+           const data = {};
+           formData.forEach((value, key) => { data[key] = value; });
+
+           const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+           const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+           let headers = { 'Content-Type': 'application/json' };
+           if(csrfTokenMeta && csrfHeaderMeta){
+               headers[csrfHeaderMeta.getAttribute('content')] = csrfTokenMeta.getAttribute('content');
+           }
+
+           fetch('/checkout/confirmar', {
+               method: 'POST',
+               headers: headers,
+               body: JSON.stringify(data)
+           })
+           .then(res => {
+               if(!res.ok) return res.text().then(t => { throw new Error(t); });
+               return res.text();
+           })
+           .then(text => {
+               console.log(text); // ahora es la URL de redirección
+               mostrarAnimacionCompraExitosa(() => {
+                   window.location.href = text; // redirige al pedido correcto con ID
+               });
+               step3Form.reset();
+           })
+           .catch(err => {
+               console.error("Error al confirmar compra:", err);
+               alert("Ocurrió un error al guardar la compra: " + err.message);
+           });
+       }
+
+       function mostrarAnimacionCompraExitosa(callback) {
+           const overlay = document.createElement("div");
+           overlay.style.position = "fixed";
+           overlay.style.top = 0;
+           overlay.style.left = 0;
+           overlay.style.width = "100%";
+           overlay.style.height = "100%";
+           overlay.style.backgroundColor = "rgba(0,0,0,0.7)";
+           overlay.style.display = "flex";
+           overlay.style.alignItems = "center";
+           overlay.style.justifyContent = "center";
+           overlay.style.zIndex = 9999;
+
+           const mensaje = document.createElement("div");
+           mensaje.innerHTML = `
+               <h1 style="color:white; font-size:3rem; text-align:center;">¡Compra Confirmada!</h1>
+               <p style="color:white; text-align:center;">Gracias por tu compra 🎉</p>
+           `;
+           overlay.appendChild(mensaje);
+
+           document.body.appendChild(overlay);
+
+           setTimeout(() => {
+               overlay.remove();
+               if(callback) callback();
+           }, 3000);
+       }
+   });
+
+      const input = document.getElementById('fechaExp');
+
+      input.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length > 2) {
+
+          value = value.substring(0, 2) + ' / ' + value.substring(2, 4);
+        }
+
+        e.target.value = value;
+      });
+
+      let productoAEliminar = null;
+
+  function eliminarProducto(idProducto) {
+      productoAEliminar = idProducto;
+      document.getElementById("modalEliminar").classList.remove("hidden");
+  }
+
+  function cerrarModalEliminar() {
+      document.getElementById("modalEliminar").classList.add("hidden");
+      productoAEliminar = null;
+  }
+
+  function confirmarEliminar() {
+
+      if (!productoAEliminar) return;
+
+      const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+      const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+      let headers = {};
+
+      if (csrfTokenMeta && csrfHeaderMeta) {
+          headers[csrfHeaderMeta.getAttribute('content')] =
+              csrfTokenMeta.getAttribute('content');
+      }
+
+      fetch("/carrito/eliminar/" + productoAEliminar, {
+          method: "POST",
+          headers: headers
+      })
+      .then(response => {
+          if (response.ok) {
+              location.reload();
+          } else {
+              alert("Error al eliminar el producto");
+          }
+      })
+      .catch(error => {
+          console.error("Error:", error);
+          alert("Ocurrió un error");
+      });
+
+      cerrarModalEliminar();
+  }
+  </script>
+
+
+
+  <script th:if="${warningLogin}">
+      document.addEventListener("DOMContentLoaded", function(){
+          document.getElementById("loginWarningModal").classList.remove("hidden");
+      });
+  </script>
+<!--<script th:src="@{/script/checkout-validaciones.js}"></script>-->
+</body>
+</html>
+	

@@ -1,0 +1,85 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Georgia', serif;
+    background: url('/img/fondotecno.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+
+.registro-container {
+    background-color: rgba(255, 255, 255, 0.96);
+    padding: 45px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 520px; /* Aumentado de 420px a 520px */
+    text-align: center;
+    margin: auto;
+}
+
+.logo-container {
+    margin-bottom: 25px;
+}
+
+.logo-container img {
+    max-width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+h4 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    font-weight: normal;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: #c49a6c;
+    outline: none;
+    box-shadow: 0 0 4px rgba(196, 154, 108, 0.4);
+}
+
+.btn-registrar {
+    background-color: #c49a6c;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.btn-registrar:hover {
+    background-color: #a1744e;
+}
+
+small {
+    display: block;
+    margin-top: 15px;
+    color: #555;
+}
+
+small a {
+    color: #c49a6c;
+    text-decoration: none;
+}
+
+small a:hover {
+    text-decoration: underline;
+}
