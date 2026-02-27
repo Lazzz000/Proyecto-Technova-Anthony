@@ -57,7 +57,7 @@ bg-gradient-to-br from-[#0a1f44] via-[#0f2a5f] to-[#1b1f3b]">
 	        <!-- Dropdown Categorías -->
 	        <li class="relative group">
 	          <span class="cursor-pointer hover:text-cyan-400 transition">Categorías</span>
-	          <ul class="absolute hidden group-hover:block bg-gray-800 mt-2 rounded shadow w-48">
+	          <ul class="absolute hidden group-hover:block bg-gray-800 top-full rounded shadow w-48">
 	            <li th:each="c : ${categorias}">
 	              <a th:href="@{'/catalogo?categoria=' + ${c.idCategoria}}"
 	                 th:text="${c.nombreCategoria}"
@@ -489,7 +489,7 @@ text-gray-300 border-t border-cyan-400/20">
         <h3 class="font-semibold mb-3">Enlaces</h3>
         <ul class="space-y-2 list-none p-0 m-0">
           <li><a th:href="@{/PaginaWeb/index}" class="hover:text-red-500">Inicio</a></li>
-          <li><a th:href="@{/cartelera}" class="hover:text-red-500">Productos</a></li>
+          <li><a th:href="@{/catalogo}" class="hover:text-red-500">Productos</a></li>
           <li><a th:href="@{/nosotros}" class="hover:text-red-500">Nosotros</a></li>
           <li><a th:href="@{/contacto}" class="hover:text-red-500">Contacto</a></li>
         </ul>
