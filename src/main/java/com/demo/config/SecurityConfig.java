@@ -45,6 +45,7 @@ public class SecurityConfig {
                .requestMatchers(
                     "/",
                     "/PaginaWeb/**",
+                    "/api/v1/**", // <-- RUTA EXCLUSIVA PARA LA APP MÓVIL
                     "/login",
                     "/register",
                     "/css/**",
