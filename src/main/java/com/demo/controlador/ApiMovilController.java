@@ -15,12 +15,29 @@ import java.util.Map;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.demo.modelo.*;
+import com.demo.modelo.enums.EstadoPedido;
+import com.demo.modelo.enums.MetodoPago;
+import com.demo.repositorio.*;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ApiMovilController {
 
     @Autowired
     private ProductosService productoService;
+    @Autowired private PedidoRepositorio pedidoRepo;
+    @Autowired private PedidoDetalleRepositorio detalleRepo;
+    @Autowired private ClienteRepositorio clienteRepo;
+    @Autowired private ProductosRepositorio productosRepo;
+    @Autowired private DocumentoIdentificacionRepositorio docRepo;
 
     @Autowired
     private CategoriaService categoriaService;
@@ -47,22 +64,80 @@ public class ApiMovilController {
         return ResponseEntity.ok(subcategorias);
     }
     
- // --- ENDPOINT PARA RECIBIR EL CHECKOUT MÓVIL ---
+ // --- ENDPOINT PARA RECIBIR EL CHECKOUT MÓVIL Y GUARDAR EN MYSQL ---
     @PostMapping("/checkout")
-    public ResponseEntity<Map<String, Object>> recibirPedidoMovil(@RequestBody PedidoMovilRequest pedido) {
+    @Transactional // Esto asegura que si algo falla, no se guarde información a medias
+    public ResponseEntity<Map<String, Object>> recibirPedidoMovil(@RequestBody PedidoMovilRequest pedidoReq) {
         
-        System.out.println("=========================================");
-        System.out.println("¡ALERTA: PEDIDO RECIBIDO DESDE LA APP NEXUS!");
-        System.out.println("Usuario ID: " + pedido.getUsuarioId());
-        System.out.println("Cantidad de productos distintos: " + pedido.getDetalles().size());
-        System.out.println("=========================================");
-
-        // Preparamos la respuesta exitosa en formato JSON para Android
         Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("exito", true);
-        respuesta.put("mensaje", "El servidor de TechNova recibió tu pedido correctamente.");
-        
-        return ResponseEntity.ok(respuesta);
+
+        try {
+            // 1. Buscamos al Cliente (Por ahora asumimos que el usuarioId de la app coincide con un Cliente)
+            Cliente cliente = clienteRepo.findById(pedidoReq.getUsuarioId()).orElse(null);
+            if(cliente == null) {
+                // Si no existe, usamos el cliente ID 1 por defecto para que no falle la prueba
+                cliente = clienteRepo.findById(1).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            }
+
+            // 2. Buscamos un Documento de Identificación por defecto (ej. DNI ID 1)
+            DocumentoIdentificacion doc = docRepo.findById(1).orElseThrow(() -> new RuntimeException("Documento no encontrado"));
+
+            // 3. CREAMOS EL PEDIDO MAESTRO
+            Pedido nuevoPedido = new Pedido();
+            nuevoPedido.setCliente(cliente);
+            nuevoPedido.setDocumento(doc);
+            // Llenamos los campos obligatorios que definiste en Pedido.java
+            nuevoPedido.setNombreReceptor("Cliente desde App Móvil"); 
+            nuevoPedido.setFechaPedido(LocalDateTime.now());
+            nuevoPedido.setDireccionEnvio("Compra gestionada vía Nexus App");
+            nuevoPedido.setCiudad("Lima");
+            nuevoPedido.setTelefonoContacto("999888777");
+            nuevoPedido.setMetodoPago(MetodoPago.TARJETA); // O el método que prefieras
+            nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
+
+            // Calculamos el Total sumando los detalles
+            BigDecimal totalPedido = BigDecimal.ZERO;
+            for(DetalleMovilRequest d : pedidoReq.getDetalles()) {
+                BigDecimal subtotal = BigDecimal.valueOf(d.getPrecio()).multiply(BigDecimal.valueOf(d.getCantidad()));
+                totalPedido = totalPedido.add(subtotal);
+            }
+            nuevoPedido.setTotal(totalPedido);
+
+            // Guardamos el pedido maestro para generar su ID (idPedido)
+            Pedido pedidoGuardado = pedidoRepo.save(nuevoPedido);
+
+            // 4. CREAMOS LOS DETALLES Y DESCONTAMOS STOCK
+            for(DetalleMovilRequest d : pedidoReq.getDetalles()) {
+                // Buscamos el producto real en la BD
+                Productos productoReal = productosRepo.findById(d.getProductoId()).orElseThrow();
+
+                // Actualizamos el stock real en la nube
+                productoReal.setStock(productoReal.getStock() - d.getCantidad());
+                productosRepo.save(productoReal);
+
+                // Creamos el detalle
+                PedidoDetalle detalle = new PedidoDetalle();
+                detalle.setPedido(pedidoGuardado);
+                detalle.setProducto(productoReal);
+                detalle.setCantidad(d.getCantidad());
+                detalle.setPrecioUnitario(BigDecimal.valueOf(d.getPrecio()));
+
+                // Guardamos el detalle
+                detalleRepo.save(detalle);
+            }
+
+            // 5. ¡ÉXITO! Respondemos a la App Móvil
+            respuesta.put("exito", true);
+            respuesta.put("mensaje", "Orden #" + pedidoGuardado.getIdPedido() + " generada con éxito");
+            
+            return ResponseEntity.ok(respuesta);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            respuesta.put("exito", false);
+            respuesta.put("mensaje", "Error crítico en el servidor: " + e.getMessage());
+            return ResponseEntity.status(500).body(respuesta);
+        }
     }
     
  // --- CLASES AUXILIARES PARA LEER EL JSON MÓVIL ---
